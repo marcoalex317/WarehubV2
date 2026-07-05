@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detail Gudang — WareHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <link rel="stylesheet" href="assets/css/navbar.css" />
+  <link rel="stylesheet" href="assets/css/components.css" />
+  <style>
+    .gallery { display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 220px 220px; gap: 8px; border-radius: var(--radius-xl); overflow: hidden; margin-bottom: 2.5rem; }
+    .gallery img { width: 100%; height: 100%; object-fit: cover; }
+    .gallery > div:first-child { grid-row: 1 / 3; height: 448px; }
+    .detail-layout { display: grid; grid-template-columns: 1fr 380px; gap: 3rem; align-items: start; }
+    .detail-section { padding-bottom: 2rem; margin-bottom: 2rem; border-bottom: 1px dashed var(--color-gray-200); }
+    .detail-section:last-child { border: none; }
+    .detail-section h3 { font-family: var(--font-display); font-weight: 700; font-size: 1.25rem; color: var(--color-ink-900); margin-bottom: 1rem; letter-spacing: -0.01em; }
+    .facility-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+    .facility-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--color-gray-50); border-radius: var(--radius-md); font-size: var(--font-size-sm); color: var(--color-gray-700); }
+    .specs-table { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .spec-tile { padding: 1rem; border: var(--border-subtle); border-radius: var(--radius-md); background: var(--color-white); }
+    .spec-tile .lbl { font-size: 11px; font-family: var(--font-mono); color: var(--color-gray-500); letter-spacing: 0.06em; text-transform: uppercase; }
+    .spec-tile .val { font-family: var(--font-display); font-weight: 700; font-size: 1.125rem; color: var(--color-ink-900); margin-top: 4px; letter-spacing: -0.01em; }
+    .booking-card { position: sticky; top: calc(var(--navbar-height) + 1.5rem); border: var(--border-subtle); border-radius: var(--radius-xl); padding: 1.75rem; background: var(--color-white); box-shadow: var(--shadow-md); }
+    .review-card { padding: 1.25rem; border: var(--border-subtle); border-radius: var(--radius-lg); margin-bottom: 0.75rem; background: var(--color-white); }
+    .review-card:last-child { margin-bottom: 0; }
+    .stars { color: #FBBF24; letter-spacing: 1px; }
+    .pricing-row { display: flex; justify-content: space-between; padding: 0.5rem 0; font-size: var(--font-size-sm); }
+    .pricing-row.total { padding-top: 0.75rem; border-top: 1px dashed var(--color-gray-300); margin-top: 0.5rem; font-family: var(--font-display); font-weight: 700; font-size: 1.125rem; color: var(--color-ink-900); }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-logo"><img src="assets/images/logo.png" alt="WareHub" /></a>
+      <div class="navbar-links">
+        <a href="index.html" class="nav-link">Beranda</a>
+        <a href="index.html#fitur" class="nav-link">Fitur</a>
+        <a href="index.html#cara-kerja" class="nav-link">Cara Kerja</a>
+        <a href="search.html" class="nav-link">Cari Gudang</a>
+        <a href="dashboard-tenant.html" class="nav-link" id="nav-tenant" style="display:none;">Dashboard</a>
+        <a href="dashboard-owner.html" class="nav-link" id="nav-owner" style="display:none;">Dashboard</a>
+      </div>
+      <div class="navbar-right"></div>
+    </div>
+  </nav>
+
+  <main class="page-wrapper">
+    <div class="container" style="padding-top: 2rem;">
+
+      <!-- breadcrumb -->
+      <div style="display: flex; align-items: center; gap: 0.5rem; font-size: var(--font-size-sm); color: var(--color-gray-500); margin-bottom: 1.5rem;">
+        <a href="index.html" style="color: var(--color-gray-500);">Beranda</a>
+        <span>›</span>
+        <a href="search.html" style="color: var(--color-gray-500);">Cari Gudang</a>
+        <span>›</span>
+        <span id="bc-name" style="color: var(--color-ink-900); font-weight: 500;">—</span>
+      </div>
+
+      <div id="detail-content"></div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-logo">WareHub</div>
+        <p class="footer-desc">Marketplace sewa gudang fleksibel untuk UMKM dan online seller Indonesia. Dibangun di Jakarta, untuk seluruh nusantara.</p>
+      </div>
+      <div class="footer-col">
+        <h6>Platform</h6>
+        <ul>
+          <li><a href="search.html">Cari Gudang</a></li>
+          <li><a href="register.html?role=owner">Daftarkan Gudang</a></li>
+          <li><a href="dashboard-tenant.html">Dashboard</a></li>
+          <li><a href="messages.html">Pesan</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h6>Perusahaan</h6>
+        <ul>
+          <li><a href="#">Tentang Kami</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Karir</a></li>
+          <li><a href="#">Press Kit</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h6>Bantuan</h6>
+        <ul>
+          <li><a href="#">Pusat Bantuan</a></li>
+          <li><a href="insurance.html">Asuransi &amp; Syarat Ketentuan</a></li>
+          <li><a href="#">Kebijakan Privasi</a></li>
+          <li><a href="messages.html">Hubungi Kami</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 WareHub. Hak cipta dilindungi.</p>
+      <p>Dibuat dengan ☕ untuk UMKM Indonesia</p>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    updateNavbar();
+    const user = getCurrentUser();
+
+    const id = parseInt(new URLSearchParams(location.search).get('id') || '1');
+    const w = warehouses.find(x => x.id === id) || warehouses[0];
+    document.getElementById('bc-name').textContent = w.name;
+    document.title = w.name + ' — WareHub';
+
+    // Gallery uses 4 of the available 6 images
+    const galleryImgs = warehouses.slice(0, 4).map(x => x.image);
+    galleryImgs[0] = w.image;
+
+    const facIcons = {
+      'CCTV': 'assets/icons/check.svg',
+      'AC': 'assets/icons/check.svg',
+      'Pendingin': 'assets/icons/check.svg',
+      'Keamanan 24 Jam': 'assets/icons/check.svg',
+      'Akses Kendaraan': 'assets/icons/check.svg',
+      'Rak Penyimpanan': 'assets/icons/box.svg',
+      'Listrik 24 Jam': 'assets/icons/check.svg',
+      'Toilet': 'assets/icons/check.svg',
+      'Loading Dock': 'assets/icons/warehouse.svg',
+      'Forklift': 'assets/icons/warehouse.svg'
+    };
+
+    const reviews = [
+      { name: 'Sarah W.', avatar: 'S', rating: 5, date: '2 minggu lalu', text: 'Lokasi strategis, gudang bersih dan aman. Stafnya ramah, akses kendaraan lancar. Sangat direkomendasikan untuk seller online.' },
+      { name: 'Hendra K.', avatar: 'H', rating: 5, date: '1 bulan lalu', text: 'Sudah sewa 3 bulan, no issue sama sekali. CCTV aktif 24/7, listrik stabil, tidak pernah lembab. Worth setiap rupiah.' },
+      { name: 'Dewi R.', avatar: 'D', rating: 4, date: '2 bulan lalu', text: 'Gudangnya OK, fasilitas sesuai deskripsi. Hanya saja pintu masuk agak sempit untuk truk box besar.' }
+    ];
+
+    const html = `
+      <h1 style="color: var(--color-ink-900); font-size: 2.25rem; margin-bottom: 0.75rem; letter-spacing: -0.025em;">${w.name}</h1>
+      <div style="display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; margin-bottom: 1.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.4rem; font-size: var(--font-size-sm); color: var(--color-gray-700);">
+          <img src="assets/icons/star.svg" alt="" style="width: 14px; height: 14px;" />
+          <strong style="color: var(--color-ink-900);">${w.rating}</strong>
+          <span style="color: var(--color-gray-500);">(${w.reviews} ulasan)</span>
+        </div>
+        <span style="color: var(--color-gray-300);">•</span>
+        <div style="display: flex; align-items: center; gap: 0.4rem; font-size: var(--font-size-sm); color: var(--color-gray-700);">
+          <img src="assets/icons/location.svg" alt="" style="width: 14px; height: 14px;" />
+          ${w.address}
+        </div>
+        <span style="color: var(--color-gray-300);">•</span>
+        ${w.available ? `<span class="badge badge-success"><span class="dot dot-success"></span>Tersedia</span>` : `<span class="badge badge-gray">Penuh</span>`}
+        <span class="badge badge-primary" style="background: var(--color-primary-light); color: var(--color-primary-dark);">Verified Host</span>
+      </div>
+
+      <div class="gallery">
+        <div><img src="${galleryImgs[0]}" alt="" /></div>
+        <div><img src="${galleryImgs[1]}" alt="" /></div>
+        <div><img src="${galleryImgs[2]}" alt="" /></div>
+        <div><img src="${galleryImgs[3]}" alt="" /></div>
+        <div style="position: relative;"><img src="${galleryImgs[1]}" alt="" /><div style="position: absolute; inset: 0; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; color: white; font-family: var(--font-display); font-weight: 600; cursor: pointer;">+12 foto</div></div>
+      </div>
+
+      <div class="detail-layout">
+        <div>
+          <!-- Specs -->
+          <div class="detail-section">
+            <h3>Spesifikasi</h3>
+            <div class="specs-table">
+              <div class="spec-tile"><div class="lbl">Luas</div><div class="val">${w.size} m²</div></div>
+              <div class="spec-tile"><div class="lbl">Tinggi</div><div class="val">3.5 m</div></div>
+              <div class="spec-tile"><div class="lbl">Akses</div><div class="val">24/7</div></div>
+              <div class="spec-tile"><div class="lbl">Min sewa</div><div class="val">1 hari</div></div>
+            </div>
+          </div>
+
+          <!-- About -->
+          <div class="detail-section">
+            <h3>Tentang gudang ini</h3>
+            <p style="color: var(--color-gray-700); line-height: 1.75; font-size: var(--font-size-base);">${w.description}</p>
+            <p style="color: var(--color-gray-700); line-height: 1.75; font-size: var(--font-size-base); margin-top: 1rem;">Pemilik berkomitmen menjaga kualitas gudang dan responsif terhadap kebutuhan penyewa. Cocok untuk UMKM, online seller, distributor kecil hingga menengah.</p>
+          </div>
+
+          <!-- Facilities -->
+          <div class="detail-section">
+            <h3>Fasilitas</h3>
+            <div class="facility-grid">
+              ${w.facilities.map(f => `
+                <div class="facility-item">
+                  <div class="icon-tile"><img src="${facIcons[f] || 'assets/icons/check.svg'}" alt="" /></div>
+                  <span>${f}</span>
+                </div>`).join('')}
+            </div>
+          </div>
+
+          <!-- Map -->
+          <div class="detail-section">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+              <h3 style="margin:0;">Lokasi Gudang</h3>
+              <a href="https://maps.google.com/?q=${encodeURIComponent(w.address)}" target="_blank" rel="noopener"
+                 class="btn btn-outline btn-sm">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <path d="M10.5 1H2.5C1.67 1 1 1.67 1 2.5V10.5C1 11.33 1.67 12 2.5 12H10.5C11.33 12 12 11.33 12 10.5V2.5C12 1.67 11.33 1 10.5 1Z" stroke="currentColor" stroke-width="1.3"/>
+                  <path d="M8 1V5H12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                  <path d="M5 8L12 1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                </svg>
+                Buka Google Maps
+              </a>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.5rem;font-size:var(--font-size-sm);color:var(--color-gray-600);margin-bottom:0.875rem;">
+              <img src="assets/icons/location.svg" alt="" style="width:14px;height:14px;opacity:0.6;" />
+              ${w.address}
+            </div>
+            <div style="border-radius:var(--radius-lg);overflow:hidden;border:var(--border-subtle);">
+              <iframe
+                src="https://maps.google.com/maps?q=${encodeURIComponent(w.address)}&output=embed&hl=id&z=15"
+                width="100%" height="320"
+                style="display:block;border:none;"
+                allowfullscreen loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade">
+              </iframe>
+            </div>
+            <p style="font-size:11px;color:var(--color-gray-400);margin-top:0.5rem;text-align:center;">
+              Peta perkiraan. Lokasi tepat dikonfirmasi pemilik setelah booking.
+            </p>
+          </div>
+
+          <!-- Host -->
+          <div class="detail-section">
+            <h3>Tentang pemilik</h3>
+            <div style="display: flex; align-items: center; gap: 1rem; padding: 1.25rem; border: var(--border-subtle); border-radius: var(--radius-lg);">
+              <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--color-ink-900); color: white; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 1.25rem;">B</div>
+              <div style="flex: 1;">
+                <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); margin-bottom: 2px;">Budi Santoso</div>
+                <div style="font-size: var(--font-size-sm); color: var(--color-gray-500);">Bergabung sejak 2022 · 12 gudang aktif · respon &lt; 30 menit</div>
+              </div>
+              <button class="btn btn-outline btn-sm">Hubungi</button>
+            </div>
+          </div>
+
+          <!-- Reviews -->
+          <div class="detail-section" style="border: none; padding-bottom: 0;">
+            <div style="display: flex; align-items: end; justify-content: space-between; margin-bottom: 1.25rem;">
+              <h3 style="margin: 0;">Ulasan (${w.reviews})</h3>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="stars">★★★★★</span>
+                <strong style="color: var(--color-ink-900); font-family: var(--font-display);">${w.rating}</strong>
+                <span style="font-size: var(--font-size-sm); color: var(--color-gray-500);">/ 5.0</span>
+              </div>
+            </div>
+            ${reviews.map(r => `
+              <div class="review-card">
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                  <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--color-primary-light); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-weight: 700;">${r.avatar}</div>
+                  <div style="flex: 1;">
+                    <div style="font-weight: 600; color: var(--color-ink-900); font-size: var(--font-size-sm);">${r.name}</div>
+                    <div style="font-size: 11px; color: var(--color-gray-500);">${r.date}</div>
+                  </div>
+                  <span class="stars" style="font-size: 13px;">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
+                </div>
+                <p style="font-size: var(--font-size-sm); color: var(--color-gray-700); line-height: 1.7;">${r.text}</p>
+              </div>`).join('')}
+          </div>
+        </div>
+
+        <!-- BOOKING SIDEBAR -->
+        <aside>
+          <div class="booking-card">
+            <div style="display: flex; align-items: baseline; gap: 6px; margin-bottom: 1.25rem;">
+              <div style="font-family: var(--font-display); font-weight: 800; font-size: 1.75rem; color: var(--color-ink-900); letter-spacing: -0.025em;">${formatRupiah(w.price)}</div>
+              <div style="font-size: var(--font-size-sm); color: var(--color-gray-500);">/ hari</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.75rem;">
+              <div>
+                <label style="font-size: 11px; font-family: var(--font-mono); color: var(--color-gray-500); letter-spacing: 0.06em;">CHECK-IN</label>
+                <input type="date" id="d-start" style="width: 100%; padding: 0.65rem; border: var(--border-subtle); border-radius: var(--radius-md); margin-top: 4px; font-size: var(--font-size-sm); outline: none;" />
+              </div>
+              <div>
+                <label style="font-size: 11px; font-family: var(--font-mono); color: var(--color-gray-500); letter-spacing: 0.06em;">CHECK-OUT</label>
+                <input type="date" id="d-end" style="width: 100%; padding: 0.65rem; border: var(--border-subtle); border-radius: var(--radius-md); margin-top: 4px; font-size: var(--font-size-sm); outline: none;" />
+              </div>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+              <label style="font-size: 11px; font-family: var(--font-mono); color: var(--color-gray-500); letter-spacing: 0.06em;">DURASI</label>
+              <select id="d-dur" style="width: 100%; padding: 0.65rem; border: var(--border-subtle); border-radius: var(--radius-md); margin-top: 4px; font-size: var(--font-size-sm); outline: none;">
+                <option value="1">1 hari</option>
+                <option value="7">1 minggu (7 hari)</option>
+                <option value="14">2 minggu (14 hari)</option>
+                <option value="30" selected>1 bulan (30 hari)</option>
+                <option value="90">3 bulan (90 hari)</option>
+              </select>
+            </div>
+
+            <div style="background: var(--color-gray-50); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1rem;">
+              <div class="pricing-row"><span style="color: var(--color-gray-600);" id="b-sub-label">${formatRupiah(w.price)} × 30 hari</span><span style="color: var(--color-ink-900); font-weight: 600;" id="b-sub">—</span></div>
+              <div class="pricing-row"><span style="color: var(--color-gray-600);">Biaya layanan (5%)</span><span style="color: var(--color-ink-900); font-weight: 600;" id="b-fee">—</span></div>
+              <div class="pricing-row total"><span>Total</span><span id="b-total">—</span></div>
+            </div>
+
+            <button class="btn btn-primary btn-lg" style="width: 100%; justify-content: center;" onclick="goBook()">
+              Booking sekarang
+            </button>
+
+            <p style="text-align: center; font-size: 11px; color: var(--color-gray-500); margin-top: 0.75rem;">Belum dipotong sampai pemilik konfirmasi</p>
+
+            <div style="margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px dashed var(--color-gray-200); display: flex; flex-direction: column; gap: 0.5rem; font-size: 12px; color: var(--color-gray-600);">
+              <div style="display: flex; align-items: center; gap: 0.5rem;"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11.5 3.5L5.5 9.5L2.5 6.5" stroke="#15803D" stroke-width="2" stroke-linecap="round"/></svg>Pembayaran escrow aman</div>
+              <div style="display: flex; align-items: center; gap: 0.5rem;"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11.5 3.5L5.5 9.5L2.5 6.5" stroke="#15803D" stroke-width="2" stroke-linecap="round"/></svg>Bisa cancel gratis &lt;24 jam</div>
+              <div style="display: flex; align-items: center; gap: 0.5rem;"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11.5 3.5L5.5 9.5L2.5 6.5" stroke="#15803D" stroke-width="2" stroke-linecap="round"/></svg>Konfirmasi dalam 30 menit</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    `;
+
+    document.getElementById('detail-content').innerHTML = html;
+
+    function updatePricing() {
+      const days = parseInt(document.getElementById('d-dur').value);
+      const { subtotal, fee, total } = calcBookingPrice(w.price, days);
+      document.getElementById('b-sub-label').textContent = `${formatRupiah(w.price)} × ${days} hari`;
+      document.getElementById('b-sub').textContent = formatRupiah(subtotal);
+      document.getElementById('b-fee').textContent = formatRupiah(fee);
+      document.getElementById('b-total').textContent = formatRupiah(total);
+    }
+
+    document.getElementById('d-dur').addEventListener('change', updatePricing);
+    document.getElementById('d-start').addEventListener('change', () => {
+      const start = document.getElementById('d-start').value;
+      const dur = parseInt(document.getElementById('d-dur').value);
+      if (start) {
+        const end = new Date(start);
+        end.setDate(end.getDate() + dur);
+        document.getElementById('d-end').value = end.toISOString().split('T')[0];
+      }
+    });
+    document.getElementById('d-start').value = todayISO();
+    document.getElementById('d-start').dispatchEvent(new Event('change'));
+    updatePricing();
+
+    function goBook() {
+      saveBookingData({
+        warehouseId: w.id,
+        startDate: document.getElementById('d-start').value,
+        days: parseInt(document.getElementById('d-dur').value)
+      });
+      window.location.href = 'booking.html';
+    }
+  </script>
+</body>
+</html>

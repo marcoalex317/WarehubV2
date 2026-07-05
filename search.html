@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cari Gudang — WareHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <link rel="stylesheet" href="assets/css/navbar.css" />
+  <link rel="stylesheet" href="assets/css/components.css" />
+  <style>
+    .search-layout { display: grid; grid-template-columns: 280px 1fr; gap: 2.5rem; align-items: start; }
+    .filter-aside { position: sticky; top: calc(var(--navbar-height) + 1.5rem); padding: 1.5rem; border: var(--border-subtle); border-radius: var(--radius-lg); background: var(--color-white); }
+    .filter-aside h6 { font-family: var(--font-display); font-weight: 700; font-size: 0.95rem; color: var(--color-ink-900); margin-bottom: 0.75rem; letter-spacing: -0.01em; }
+    .filter-group { padding-bottom: 1.25rem; margin-bottom: 1.25rem; border-bottom: 1px dashed var(--color-gray-200); }
+    .filter-group:last-child { border: none; padding-bottom: 0; margin-bottom: 0; }
+    .check-row { display: flex; align-items: center; gap: 0.625rem; font-size: var(--font-size-sm); color: var(--color-gray-700); padding: 0.25rem 0; cursor: pointer; }
+    .check-row input { accent-color: var(--color-primary); width: 14px; height: 14px; }
+    .check-row .count { margin-left: auto; font-family: var(--font-mono); font-size: 11px; color: var(--color-gray-400); }
+    .price-range { display: flex; gap: 0.5rem; align-items: center; }
+    .price-range input { flex: 1; border: var(--border-subtle); padding: 0.5rem 0.75rem; border-radius: var(--radius-md); font-size: var(--font-size-sm); width: 100%; outline: none; }
+    .price-range input:focus { border-color: var(--color-ink-900); }
+    .results-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+    .chip-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-logo"><img src="assets/images/logo.png" alt="WareHub" /></a>
+      <div class="navbar-links">
+        <a href="index.html" class="nav-link">Beranda</a>
+        <a href="index.html#fitur" class="nav-link">Fitur</a>
+        <a href="index.html#cara-kerja" class="nav-link">Cara Kerja</a>
+        <a href="search.html" class="nav-link active">Cari Gudang</a>
+        <a href="dashboard-tenant.html" class="nav-link" id="nav-tenant" style="display:none;">Dashboard</a>
+        <a href="dashboard-owner.html" class="nav-link" id="nav-owner" style="display:none;">Dashboard</a>
+      </div>
+      <div class="navbar-right"></div>
+    </div>
+  </nav>
+
+  <main class="page-wrapper">
+
+    <!-- Search header -->
+    <section style="background: var(--color-white); border-bottom: var(--border-subtle); padding: 2rem 0;">
+      <div class="container">
+        <div class="eyebrow" style="margin-bottom: 0.75rem;">1.240 gudang aktif</div>
+        <h2 style="font-size: 1.75rem; color: var(--color-ink-900); margin-bottom: 1.25rem; letter-spacing: -0.02em;">Temukan gudang yang pas.</h2>
+        <div class="search-bar" style="max-width: 760px; padding: 8px 8px 8px 22px;">
+          <img src="assets/icons/location.svg" alt="" style="width: 16px; height: 16px; opacity: 0.5;" />
+          <input id="q" type="text" placeholder="Lokasi, area, atau nama gudang..." />
+          <div class="divider-v"></div>
+          <select id="sort">
+            <option value="popular">Paling Populer</option>
+            <option value="cheap">Termurah</option>
+            <option value="rating">Rating Tertinggi</option>
+            <option value="big">Ukuran Terbesar</option>
+          </select>
+          <button class="btn btn-primary" onclick="applyFilters()" style="border-radius: 9999px; padding: 10px 20px;">Terapkan</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="padding: 2.5rem 0;">
+      <div class="container">
+        <div class="search-layout">
+
+          <!-- FILTERS -->
+          <aside class="filter-aside">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+              <div style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--color-gray-500);">FILTER</div>
+              <button class="btn btn-ghost btn-sm" onclick="resetFilters()" style="padding: 4px 10px; font-size: 12px;">Reset</button>
+            </div>
+
+            <div class="filter-group">
+              <h6>Lokasi</h6>
+              <label class="check-row"><input type="checkbox" class="loc-filter" value="Jakarta Timur" /> Jakarta Timur <span class="count">324</span></label>
+              <label class="check-row"><input type="checkbox" class="loc-filter" value="Jakarta Selatan" /> Jakarta Selatan <span class="count">281</span></label>
+              <label class="check-row"><input type="checkbox" class="loc-filter" value="Jakarta Utara" /> Jakarta Utara <span class="count">198</span></label>
+              <label class="check-row"><input type="checkbox" class="loc-filter" value="Jakarta Barat" /> Jakarta Barat <span class="count">156</span></label>
+              <label class="check-row"><input type="checkbox" class="loc-filter" value="Jakarta Pusat" /> Jakarta Pusat <span class="count">144</span></label>
+            </div>
+
+            <div class="filter-group">
+              <h6>Harga per hari</h6>
+              <div class="price-range">
+                <input id="pmin" type="number" placeholder="Min" />
+                <span style="color: var(--color-gray-400); font-size: 12px;">—</span>
+                <input id="pmax" type="number" placeholder="Max" />
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 11px; font-family: var(--font-mono); color: var(--color-gray-400);">
+                <span>Rp 0</span>
+                <span>Rp 500K+</span>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <h6>Ukuran</h6>
+              <label class="check-row"><input type="checkbox" class="size-filter" value="small" /> Kecil &lt; 20 m² <span class="count">412</span></label>
+              <label class="check-row"><input type="checkbox" class="size-filter" value="medium" /> Sedang 20–50 m² <span class="count">528</span></label>
+              <label class="check-row"><input type="checkbox" class="size-filter" value="large" /> Besar &gt; 50 m² <span class="count">300</span></label>
+            </div>
+
+            <div class="filter-group">
+              <h6>Fasilitas</h6>
+              <label class="check-row"><input type="checkbox" class="fac-filter" value="CCTV" /> CCTV</label>
+              <label class="check-row"><input type="checkbox" class="fac-filter" value="AC" /> AC / Pendingin</label>
+              <label class="check-row"><input type="checkbox" class="fac-filter" value="Loading Dock" /> Loading Dock</label>
+              <label class="check-row"><input type="checkbox" class="fac-filter" value="Keamanan 24 Jam" /> Keamanan 24 Jam</label>
+              <label class="check-row"><input type="checkbox" class="fac-filter" value="Forklift" /> Forklift</label>
+            </div>
+
+            <div class="filter-group">
+              <h6>Status</h6>
+              <label class="check-row"><input type="checkbox" id="avail-only" /> Hanya yang tersedia</label>
+            </div>
+          </aside>
+
+          <!-- RESULTS -->
+          <div>
+            <div class="results-toolbar">
+              <div>
+                <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); font-size: 1.125rem;" id="result-count">Menampilkan semua gudang</div>
+                <div style="font-size: var(--font-size-sm); color: var(--color-gray-500); margin-top: 2px;" id="result-sub">Diurutkan berdasarkan paling populer</div>
+              </div>
+              <div class="chip-row" id="quick-chips">
+                <button class="filter-chip active" onclick="quickFilter('all', this)">Semua</button>
+                <button class="filter-chip" onclick="quickFilter('cheap', this)">Hemat &lt;50K</button>
+                <button class="filter-chip" onclick="quickFilter('cold', this)">Cold Storage</button>
+                <button class="filter-chip" onclick="quickFilter('big', this)">&gt;100 m²</button>
+                <button class="filter-chip" onclick="quickFilter('top', this)">Rating 4.8+</button>
+              </div>
+            </div>
+
+            <div class="grid grid-2 gap-4" id="results-grid"></div>
+
+            <div style="text-align: center; margin-top: 3rem; padding-top: 2rem; border-top: var(--border-subtle);">
+              <p style="font-size: var(--font-size-sm); color: var(--color-gray-500); margin-bottom: 1rem;">Menampilkan 6 dari 1.240 gudang</p>
+              <button class="btn btn-outline">Muat lebih banyak</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-logo">WareHub</div>
+        <p class="footer-desc">Marketplace sewa gudang fleksibel untuk UMKM dan online seller Indonesia. Dibangun di Jakarta, untuk seluruh nusantara.</p>
+      </div>
+      <div class="footer-col">
+        <h6>Platform</h6>
+        <ul>
+          <li><a href="search.html">Cari Gudang</a></li>
+          <li><a href="register.html?role=owner">Daftarkan Gudang</a></li>
+          <li><a href="dashboard-tenant.html">Dashboard</a></li>
+          <li><a href="messages.html">Pesan</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h6>Perusahaan</h6>
+        <ul>
+          <li><a href="#">Tentang Kami</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Karir</a></li>
+          <li><a href="#">Press Kit</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h6>Bantuan</h6>
+        <ul>
+          <li><a href="#">Pusat Bantuan</a></li>
+          <li><a href="insurance.html">Asuransi &amp; Syarat Ketentuan</a></li>
+          <li><a href="#">Kebijakan Privasi</a></li>
+          <li><a href="messages.html">Hubungi Kami</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 WareHub. Hak cipta dilindungi.</p>
+      <p>Dibuat dengan ☕ untuk UMKM Indonesia</p>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    updateNavbar();
+
+    const params = new URLSearchParams(window.location.search);
+    const initialQ = params.get('q') || '';
+    if (initialQ) document.getElementById('q').value = initialQ;
+
+    let activeQuick = 'all';
+    let compareList = [];
+
+    function buildCard(w) {
+      const availBadge = w.available
+        ? `<span class="badge badge-success"><span class="dot dot-success"></span>Tersedia</span>`
+        : `<span class="badge badge-gray">Penuh</span>`;
+      const tags = w.tags.slice(0, 2).map(t => `<span class="badge badge-gray">${t}</span>`).join('');
+      const isSelected = compareList.includes(w.id);
+      return `
+        <a href="detail.html?id=${w.id}" class="card card-clickable warehouse-card" style="${isSelected ? 'outline:2px solid var(--color-primary);outline-offset:2px;' : ''}">
+          <div class="warehouse-card-availability">${availBadge}</div>
+          <div class="warehouse-card-fav" onclick="event.preventDefault();event.stopPropagation();">
+            <svg viewBox="0 0 18 18" fill="none"><path d="M9 15.5C9 15.5 1.5 11.25 1.5 6.25C1.5 4.04086 3.29086 2.25 5.5 2.25C7.0913 2.25 8.4587 3.18261 9 4.5C9.5413 3.18261 10.9087 2.25 12.5 2.25C14.7091 2.25 16.5 4.04086 16.5 6.25C16.5 11.25 9 15.5 9 15.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          </div>
+          <img src="${w.image}" alt="${w.name}" class="warehouse-card-img" />
+          <div class="card-body">
+            <div class="warehouse-card-name">${w.name}</div>
+            <div class="warehouse-card-loc"><img src="assets/icons/location.svg" alt="" />${w.location}</div>
+            <div class="warehouse-card-tags"><span class="badge badge-gray">${w.size} m²</span>${tags}</div>
+            <div class="warehouse-card-bottom">
+              <div class="warehouse-price">${formatRupiah(w.price)}<span> /hari</span></div>
+              <div class="warehouse-rating"><img src="assets/icons/star.svg" alt="" />${w.rating}<span class="reviews">(${w.reviews})</span></div>
+            </div>
+            <button onclick="event.preventDefault();event.stopPropagation();toggleCompare(${w.id})"
+                    style="width:100%;margin-top:0.625rem;padding:6px 12px;border-radius:var(--radius-md);font-size:12px;font-weight:600;cursor:pointer;border:1px solid ${isSelected ? 'var(--color-primary)' : 'var(--color-gray-300)'};background:${isSelected ? 'var(--color-primary-tint)' : 'transparent'};color:${isSelected ? 'var(--color-primary-dark)' : 'var(--color-gray-600)'};">
+              ${isSelected ? '✓ Ditambahkan ke perbandingan' : '⊕ Bandingkan'}
+            </button>
+          </div>
+        </a>`;
+    }
+
+    function toggleCompare(id) {
+      const idx = compareList.indexOf(id);
+      if (idx >= 0) {
+        compareList.splice(idx, 1);
+      } else {
+        if (compareList.length >= 2) {
+          showToast('Maksimal 2 gudang. Hapus salah satu dari bar perbandingan.');
+          return;
+        }
+        compareList.push(id);
+      }
+      renderCompareBar();
+      applyFilters();
+    }
+
+    function renderCompareBar() {
+      const bar = document.getElementById('compare-bar');
+      if (compareList.length === 0) { bar.style.display = 'none'; return; }
+      bar.style.display = 'block';
+      const btn = document.getElementById('compare-go-btn');
+      const ready = compareList.length >= 2;
+      btn.style.opacity = ready ? '1' : '0.5';
+      btn.style.pointerEvents = ready ? 'auto' : 'none';
+      const slots = document.getElementById('compare-slots');
+      const slotItems = compareList.map(id => {
+        const w = warehouses.find(x => x.id === id);
+        return `<div style="display:flex;align-items:center;gap:0.625rem;background:rgba(255,255,255,0.08);border-radius:8px;padding:0.5rem 0.75rem;">
+          <img src="${w.image}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0;" />
+          <div><div style="font-size:13px;font-weight:600;color:white;white-space:nowrap;">${w.name}</div><div style="font-size:11px;color:rgba(255,255,255,0.55);">${formatRupiah(w.price)}/hari</div></div>
+          <button onclick="toggleCompare(${id})" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.4);font-size:18px;line-height:1;padding:0 0 0 4px;">×</button>
+        </div>`;
+      });
+      if (compareList.length < 2) {
+        slotItems.push(`<div style="display:flex;align-items:center;gap:0.5rem;border:1px dashed rgba(255,255,255,0.25);border-radius:8px;padding:0.5rem 1rem;color:rgba(255,255,255,0.35);font-size:12px;">Pilih 1 gudang lagi…</div>`);
+      }
+      slots.innerHTML = slotItems.join('');
+    }
+
+    function openCompare() {
+      if (compareList.length < 2) return;
+      const [a, b] = compareList.map(id => warehouses.find(x => x.id === id));
+      function row(label, va, vb, highlight) {
+        const sA = highlight ? (va < vb ? 'color:var(--color-success);font-weight:700;' : '') : '';
+        const sB = highlight ? (vb < va ? 'color:var(--color-success);font-weight:700;' : '') : '';
+        return `<div style="display:grid;grid-template-columns:130px 1fr 1fr;gap:1rem;padding:0.625rem 0;border-bottom:1px dashed var(--color-gray-200);align-items:start;">
+          <span style="font-size:10px;color:var(--color-gray-500);font-family:var(--font-mono);letter-spacing:0.05em;text-transform:uppercase;padding-top:3px;">${label}</span>
+          <span style="font-size:13px;color:var(--color-ink-900);${sA}">${va}</span>
+          <span style="font-size:13px;color:var(--color-ink-900);${sB}">${vb}</span>
+        </div>`;
+      }
+      document.getElementById('compare-content').innerHTML = `
+        <div style="display:grid;grid-template-columns:130px 1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+          <div></div>
+          ${[a,b].map(w=>`<div style="text-align:center;">
+            <img src="${w.image}" style="width:100%;height:130px;object-fit:cover;border-radius:var(--radius-lg);margin-bottom:0.75rem;" />
+            <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);">${w.name}</div>
+            ${w.available?'<span class="badge badge-success" style="display:inline-flex;margin-top:4px;"><span class="dot dot-success"></span>Tersedia</span>':'<span class="badge badge-gray" style="display:inline-flex;margin-top:4px;">Penuh</span>'}
+          </div>`).join('')}
+        </div>
+        ${row('Harga/hari', `<strong>${formatRupiah(a.price)}</strong>`, `<strong>${formatRupiah(b.price)}</strong>`, true)}
+        ${row('Ukuran', `${a.size} m²`, `${b.size} m²`)}
+        ${row('Rating', `★ ${a.rating} <span style="color:var(--color-gray-500);font-size:11px;">(${a.reviews} ulasan)</span>`, `★ ${b.rating} <span style="color:var(--color-gray-500);font-size:11px;">(${b.reviews} ulasan)</span>`)}
+        ${row('Lokasi', a.location, b.location)}
+        ${row('Fasilitas', a.facilities.map(f=>`<span class="badge badge-gray" style="margin:2px;">${f}</span>`).join(''), b.facilities.map(f=>`<span class="badge badge-gray" style="margin:2px;">${f}</span>`).join(''))}
+        <div style="display:grid;grid-template-columns:130px 1fr 1fr;gap:1rem;margin-top:1.5rem;">
+          <div></div>
+          ${[a,b].map(w=>`<a href="detail.html?id=${w.id}" class="btn btn-primary" style="justify-content:center;">Booking ${w.name.split(' ')[0]} →</a>`).join('')}
+        </div>
+      `;
+      document.getElementById('compare-modal').classList.add('show');
+    }
+
+    function clearCompare() {
+      compareList = [];
+      renderCompareBar();
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const q = document.getElementById('q').value.toLowerCase().trim();
+      const sort = document.getElementById('sort').value;
+      const locs = [...document.querySelectorAll('.loc-filter:checked')].map(c => c.value);
+      const sizes = [...document.querySelectorAll('.size-filter:checked')].map(c => c.value);
+      const facs = [...document.querySelectorAll('.fac-filter:checked')].map(c => c.value);
+      const pmin = parseInt(document.getElementById('pmin').value || 0);
+      const pmax = parseInt(document.getElementById('pmax').value || 9999999);
+      const availOnly = document.getElementById('avail-only').checked;
+
+      let filtered = warehouses.filter(w => {
+        if (q && !(w.name.toLowerCase().includes(q) || w.location.toLowerCase().includes(q))) return false;
+        if (locs.length && !locs.some(l => w.location.includes(l))) return false;
+        if (sizes.length) {
+          const ok = sizes.some(s => (s==='small' && w.size<20) || (s==='medium' && w.size>=20 && w.size<=50) || (s==='large' && w.size>50));
+          if (!ok) return false;
+        }
+        if (facs.length && !facs.every(f => w.facilities.includes(f))) return false;
+        if (w.price < pmin || w.price > pmax) return false;
+        if (availOnly && !w.available) return false;
+
+        // Quick chip
+        if (activeQuick === 'cheap' && w.price >= 50000) return false;
+        if (activeQuick === 'cold' && !w.facilities.some(f => f.toLowerCase().includes('pendingin') || f.toLowerCase().includes('cold'))) return false;
+        if (activeQuick === 'big' && w.size <= 100) return false;
+        if (activeQuick === 'top' && w.rating < 4.8) return false;
+        return true;
+      });
+
+      if (sort === 'cheap') filtered.sort((a,b) => a.price - b.price);
+      else if (sort === 'rating') filtered.sort((a,b) => b.rating - a.rating);
+      else if (sort === 'big') filtered.sort((a,b) => b.size - a.size);
+
+      const grid = document.getElementById('results-grid');
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 4rem; border: 1px dashed var(--color-gray-300); border-radius: var(--radius-lg); color: var(--color-gray-500);"><div style="font-family: var(--font-display); font-size: 1.125rem; color: var(--color-ink-900); margin-bottom: 0.5rem;">Tidak ada gudang yang cocok</div><p style="font-size: 14px;">Coba longgarkan filter atau ubah kata kunci.</p></div>`;
+      } else {
+        grid.innerHTML = filtered.map(buildCard).join('');
+      }
+      document.getElementById('result-count').textContent = `${filtered.length} gudang ditemukan`;
+      document.getElementById('result-sub').textContent = q ? `Hasil untuk "${q}"` : `Diurutkan berdasarkan ${document.getElementById('sort').selectedOptions[0].text.toLowerCase()}`;
+    }
+
+    function quickFilter(type, btn) {
+      activeQuick = type;
+      document.querySelectorAll('#quick-chips .filter-chip').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      applyFilters();
+    }
+
+    function resetFilters() {
+      document.querySelectorAll('.filter-aside input[type=checkbox]').forEach(c => c.checked = false);
+      document.getElementById('pmin').value = '';
+      document.getElementById('pmax').value = '';
+      document.getElementById('q').value = '';
+      activeQuick = 'all';
+      document.querySelectorAll('#quick-chips .filter-chip').forEach((c,i) => c.classList.toggle('active', i===0));
+      applyFilters();
+    }
+
+    document.querySelectorAll('.filter-aside input, #sort').forEach(el => {
+      el.addEventListener('change', applyFilters);
+    });
+    document.getElementById('q').addEventListener('keydown', e => { if (e.key === 'Enter') applyFilters(); });
+
+    applyFilters();
+  </script>
+
+  <!-- COMPARE BAR -->
+  <div id="compare-bar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;background:var(--color-ink-900);padding:0.875rem 2rem;border-top:2px solid var(--color-primary);box-shadow:0 -4px 24px rgba(0,0,0,0.2);">
+    <div style="max-width:var(--container-max);margin:0 auto;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
+      <div style="font-size:10px;font-family:var(--font-mono);color:rgba(255,255,255,0.4);letter-spacing:0.1em;white-space:nowrap;">BANDINGKAN</div>
+      <div style="flex:1;display:flex;gap:0.75rem;flex-wrap:wrap;" id="compare-slots"></div>
+      <button class="btn btn-accent" id="compare-go-btn" onclick="openCompare()">
+        Bandingkan Sekarang
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7H11M11 7L7.5 3.5M11 7L7.5 10.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <button onclick="clearCompare()" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.4);font-size:12px;font-weight:600;">Batal</button>
+    </div>
+  </div>
+
+  <!-- COMPARE MODAL -->
+  <div class="modal-overlay" id="compare-modal">
+    <div style="background:white;border-radius:var(--radius-xl);max-width:900px;width:100%;padding:2rem;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:var(--border-subtle);">
+        <div>
+          <div style="font-size:10px;font-family:var(--font-mono);color:var(--color-gray-500);letter-spacing:0.08em;margin-bottom:4px;">PERBANDINGAN GUDANG</div>
+          <h2 style="color:var(--color-ink-900);font-family:var(--font-display);font-weight:800;font-size:1.5rem;letter-spacing:-0.02em;">Bandingkan Gudang</h2>
+        </div>
+        <button class="btn btn-ghost" onclick="document.getElementById('compare-modal').classList.remove('show')">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div id="compare-content"></div>
+    </div>
+  </div>
+
+</body>
+</html>

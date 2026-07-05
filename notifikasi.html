@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notifikasi — WareHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <link rel="stylesheet" href="assets/css/navbar.css" />
+  <link rel="stylesheet" href="assets/css/components.css" />
+  <style>
+    body { background: var(--color-bg); }
+    .panel { background: white; border: var(--border-subtle); border-radius: var(--radius-lg); padding: 1.5rem; }
+    .notif-item { display: flex; gap: 0.875rem; padding: 1rem 0; border-bottom: 1px dashed var(--color-gray-200); cursor: pointer; transition: background 0.15s; border-radius: 8px; margin: 0 -0.5rem; padding-left: 0.5rem; padding-right: 0.5rem; }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-item:hover { background: var(--color-gray-50); }
+    .notif-item.read { opacity: 0.65; }
+    .notif-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+    .notif-icon.booking { background: var(--color-primary-light); }
+    .notif-icon.stok { background: var(--color-warning-light); }
+    .notif-icon.promo { background: var(--color-success-light); }
+    .notif-icon.sistem { background: var(--color-gray-100); }
+    .unread-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--color-primary); flex-shrink: 0; margin-top: 7px; }
+    .unread-dot.hidden-dot { background: transparent; }
+    .chip-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-logo">WareHub</a>
+      <div class="navbar-links">
+        <a href="index.html" class="nav-link">Beranda</a>
+        <a href="index.html#fitur" class="nav-link">Fitur</a>
+        <a href="index.html#cara-kerja" class="nav-link">Cara Kerja</a>
+        <a href="search.html" class="nav-link">Cari Gudang</a>
+        <a href="#" id="nav-dashboard" class="nav-link active">Dashboard</a>
+      </div>
+      <div class="navbar-right"></div>
+    </div>
+  </nav>
+
+  <main class="page-wrapper">
+    <div class="dash-layout" style="min-height: calc(100vh - var(--navbar-height));">
+
+      <aside class="sidebar" id="sidebar"></aside>
+
+      <section class="dash-content">
+        <div class="dash-header">
+          <div>
+            <div class="eyebrow" style="margin-bottom: 0.5rem;">Akun</div>
+            <h4 style="font-family: var(--font-display); font-weight: 800; font-size: 2rem; color: var(--color-ink-900); letter-spacing: -0.025em;">Notifikasi</h4>
+            <p>Update real-time soal booking, stok, dan promo.</p>
+          </div>
+          <button class="btn btn-outline" onclick="markAllRead()">Tandai semua dibaca</button>
+        </div>
+
+        <div class="chip-row" id="filter-chips">
+          <button class="filter-chip active" onclick="filterNotif('semua', this)">Semua</button>
+          <button class="filter-chip" onclick="filterNotif('booking', this)">Booking</button>
+          <button class="filter-chip" onclick="filterNotif('stok', this)">Stok</button>
+          <button class="filter-chip" onclick="filterNotif('promo', this)">Promo</button>
+          <button class="filter-chip" onclick="filterNotif('sistem', this)">Sistem</button>
+        </div>
+
+        <div class="panel" id="notif-panel"></div>
+      </section>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    if (!requireLogin()) {}
+    updateNavbar();
+
+    const user = getCurrentUser() || { name: 'Tamu', role: 'tenant' };
+    const isOwner = user.role === 'owner';
+    const dashUrl = isOwner ? 'dashboard-owner.html' : 'dashboard-tenant.html';
+    document.getElementById('nav-dashboard').href = dashUrl;
+
+    // Sidebar
+    const sidebarMain = isOwner ? `
+      <a class="sidebar-item" href="${dashUrl}"><img src="assets/icons/chart.svg" alt="" />Overview</a>
+      <a class="sidebar-item" href="${dashUrl}"><img src="assets/icons/warehouse.svg" alt="" />Gudang saya</a>
+      <a class="sidebar-item" href="${dashUrl}"><img src="assets/icons/calendar.svg" alt="" />Booking masuk</a>
+      <a class="sidebar-item" href="${dashUrl}"><img src="assets/icons/check.svg" alt="" />Penghasilan</a>
+    ` : `
+      <a class="sidebar-item" href="${dashUrl}"><img src="assets/icons/home.svg" alt="" />Overview</a>
+      <a class="sidebar-item" href="${dashUrl}"><img src="assets/icons/calendar.svg" alt="" />Booking aktif</a>
+      <a class="sidebar-item" href="${dashUrl}"><img src="assets/icons/check.svg" alt="" />Riwayat</a>
+      <a class="sidebar-item" href="${dashUrl}"><img src="assets/icons/box.svg" alt="" />Inventaris</a>
+    `;
+
+    const sidebarBottom = isOwner ? `
+      <div style="padding: 1.5rem; margin-top: auto;">
+        <div style="background: var(--color-ink-900); color: white; border-radius: var(--radius-lg); padding: 1rem;">
+          <div style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: rgba(255,255,255,0.5); margin-bottom: 4px;">HOST RATING</div>
+          <div style="font-family: var(--font-display); font-weight: 700; font-size: 1.5rem; letter-spacing: -0.02em;">★ 4.8</div>
+          <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 2px;">Top 5% di Jakarta</div>
+        </div>
+      </div>
+    ` : `
+      <div style="padding: 1.5rem; margin-top: auto;">
+        <div style="background: var(--color-primary-tint); border: 1px solid var(--color-primary-mid); border-radius: var(--radius-lg); padding: 1rem;">
+          <div style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: var(--color-primary-dark); margin-bottom: 4px;">PROMO MEI</div>
+          <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); font-size: 0.9rem; margin-bottom: 0.75rem;">Sewa 30+ hari, gratis 3x pickup</div>
+          <a href="search.html" class="btn btn-primary btn-sm" style="width: 100%; justify-content: center;">Cari sekarang</a>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('sidebar').innerHTML = `
+      <div style="padding: 1.5rem 1.5rem 0.75rem;">
+        <div style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: var(--color-gray-500); margin-bottom: 4px;">${isOwner ? 'PEMILIK · HOST' : 'PENYEWA'}</div>
+        <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); letter-spacing: -0.01em;">${user.name}</div>
+      </div>
+      <div class="sidebar-section-label">MAIN</div>
+      ${sidebarMain}
+      <div class="sidebar-section-label" style="margin-top: 1rem;">AKUN</div>
+      <a class="sidebar-item active" href="notifikasi.html"><img src="assets/icons/bell.svg" alt="" />Notifikasi</a>
+      <a class="sidebar-item" href="profil.html"><img src="assets/icons/user.svg" alt="" />Profil</a>
+      ${sidebarBottom}
+    `;
+
+    // Extended notifications data
+    const allNotifs = [
+      { id: 1, type: 'booking', icon: '📦', title: 'Booking dikonfirmasi', message: 'Booking Ruang Kemang #WH-2402 dikonfirmasi oleh pemilik. Siap digunakan mulai 15 Mei 2026.', time: '5 menit lalu', read: false },
+      { id: 2, type: 'stok', icon: '⚠️', title: 'Stok kritis', message: 'Kaos Oversize M di Gudang Cawang hanya tersisa 12 pcs. Segera lakukan restock untuk menghindari kehabisan.', time: '2 jam lalu', read: false },
+      { id: 3, type: 'booking', icon: '📦', title: 'Masa sewa hampir habis', message: 'Sewa Gudang Cawang #WH-2401 berakhir dalam 7 hari (31 Mei 2026). Perpanjang sekarang sebelum kedaluwarsa.', time: '1 hari lalu', read: true },
+      { id: 4, type: 'promo', icon: '🎉', title: 'Promo Mei 2026', message: 'Sewa 30 hari gratis pickup 3x. Berlaku untuk semua gudang di Jakarta. Klaim sebelum 31 Mei 2026.', time: '3 hari lalu', read: true },
+      { id: 5, type: 'stok', icon: '⚠️', title: 'Stok rendah', message: 'Celana Cargo Coklat L di Gudang Cawang tersisa 28 pcs (23% kapasitas). Pertimbangkan restock minggu ini.', time: '3 hari lalu', read: true },
+      { id: 6, type: 'booking', icon: '📦', title: 'Pembayaran berhasil', message: 'Pembayaran Rp 2.550.000 untuk Gudang Cawang periode Mei 2026 telah dikonfirmasi. Terima kasih!', time: '5 hari lalu', read: true },
+      { id: 7, type: 'sistem', icon: '🔔', title: 'Selamat datang di WareHub', message: 'Akun kamu sudah aktif. Mulai temukan gudang yang sesuai kebutuhan bisnis kamu di WareHub Marketplace.', time: '1 minggu lalu', read: true },
+      { id: 8, type: 'promo', icon: '🎉', title: 'Referral reward', message: 'Kamu mendapat kredit Rp 50.000 dari referral teman. Kredit otomatis dipakai di booking berikutnya.', time: '2 minggu lalu', read: true },
+    ];
+
+    let activeFilter = 'semua';
+
+    function renderNotifs() {
+      const filtered = activeFilter === 'semua' ? allNotifs : allNotifs.filter(n => n.type === activeFilter);
+      if (filtered.length === 0) {
+        document.getElementById('notif-panel').innerHTML = `
+          <div style="text-align: center; padding: 3rem; color: var(--color-gray-400);">
+            <div style="font-size: 2rem; margin-bottom: 0.75rem;">🔔</div>
+            <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); margin-bottom: 0.5rem;">Tidak ada notifikasi</div>
+            <p style="font-size: 13px;">Notifikasi kategori ini akan muncul di sini.</p>
+          </div>`;
+        return;
+      }
+      document.getElementById('notif-panel').innerHTML = filtered.map(n => `
+        <div class="notif-item ${n.read ? 'read' : ''}" onclick="markRead(${n.id}, this)">
+          <div class="unread-dot ${n.read ? 'hidden-dot' : ''}"></div>
+          <div class="notif-icon ${n.type}">${n.icon}</div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 3px;">
+              <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); font-size: 14px;">${n.title}</div>
+              <div style="font-family: var(--font-mono); font-size: 10px; color: var(--color-gray-400); white-space: nowrap; letter-spacing: 0.04em;">${n.time.toUpperCase()}</div>
+            </div>
+            <p style="font-size: 13px; color: var(--color-gray-700); line-height: 1.55; margin: 0;">${n.message}</p>
+          </div>
+        </div>`).join('');
+    }
+
+    function filterNotif(type, btn) {
+      activeFilter = type;
+      document.querySelectorAll('#filter-chips .filter-chip').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      renderNotifs();
+    }
+
+    function markRead(id, el) {
+      const n = allNotifs.find(x => x.id === id);
+      if (n) { n.read = true; el.classList.add('read'); el.querySelector('.unread-dot').classList.add('hidden-dot'); }
+    }
+
+    function markAllRead() {
+      allNotifs.forEach(n => n.read = true);
+      renderNotifs();
+      showToast('Semua notifikasi ditandai sudah dibaca.');
+    }
+
+    renderNotifs();
+  </script>
+</body>
+</html>

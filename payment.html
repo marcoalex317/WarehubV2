@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pembayaran — WareHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <link rel="stylesheet" href="assets/css/navbar.css" />
+  <link rel="stylesheet" href="assets/css/components.css" />
+  <style>
+    .step-bar { display: flex; align-items: center; gap: 1rem; margin-bottom: 2.5rem; }
+    .step-pill { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.75rem; border-radius: 9999px; font-size: 12px; font-family: var(--font-mono); letter-spacing: 0.05em; }
+    .step-pill.active { background: var(--color-ink-900); color: white; }
+    .step-pill.done { background: var(--color-success-light); color: var(--color-success); }
+    .step-pill.pending { background: var(--color-gray-100); color: var(--color-gray-500); }
+    .step-conn { flex: 1; height: 1px; background: var(--color-gray-200); }
+    .step-conn.done { background: var(--color-success); }
+    .pay-grid { display: grid; grid-template-columns: 1fr 380px; gap: 3rem; align-items: start; }
+    .pay-method { display: flex; align-items: center; gap: 1rem; padding: 1.25rem; border: 2px solid var(--color-gray-200); border-radius: var(--radius-lg); cursor: pointer; transition: all 0.15s; margin-bottom: 0.75rem; background: white; }
+    .pay-method:hover { border-color: var(--color-gray-400); }
+    .pay-method.selected { border-color: var(--color-ink-900); background: var(--color-gray-50); }
+    .pay-method .icon { width: 48px; height: 48px; border-radius: 10px; background: var(--color-gray-100); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: var(--font-display); font-weight: 700; color: var(--color-gray-600); }
+    .pay-method.selected .icon { background: var(--color-primary-light); color: var(--color-primary); }
+    .pay-method .text h6 { font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); margin-bottom: 2px; font-size: 0.95rem; }
+    .pay-method .text p { font-size: 13px; color: var(--color-gray-500); }
+    .pay-method .check { margin-left: auto; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--color-gray-300); flex-shrink: 0; }
+    .pay-method.selected .check { border-color: var(--color-ink-900); background: var(--color-ink-900); }
+    .pay-method.selected .check::after { content: ""; display: block; width: 6px; height: 10px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); margin: 3px auto; }
+    .summary-card { position: sticky; top: calc(var(--navbar-height) + 1.5rem); background: white; border: var(--border-subtle); border-radius: var(--radius-xl); padding: 1.75rem; }
+    .pricing-row { display: flex; justify-content: space-between; padding: 0.45rem 0; font-size: 14px; }
+    .pricing-row.total { padding-top: 0.75rem; border-top: 1px dashed var(--color-gray-300); margin-top: 0.5rem; font-family: var(--font-display); font-weight: 700; font-size: 1.125rem; color: var(--color-ink-900); }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 100; padding: 2rem; }
+    .modal-overlay.show { display: flex; }
+    .modal-card { background: white; border-radius: var(--radius-2xl); max-width: 460px; width: 100%; padding: 3rem; text-align: center; }
+    @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-logo"><img src="assets/images/logo.png" alt="WareHub" /></a>
+      <div class="navbar-links">
+        <a href="index.html" class="nav-link">Beranda</a>
+        <a href="index.html#fitur" class="nav-link">Fitur</a>
+        <a href="index.html#cara-kerja" class="nav-link">Cara Kerja</a>
+        <a href="search.html" class="nav-link">Cari Gudang</a>
+        <a href="dashboard-tenant.html" class="nav-link" id="nav-tenant" style="display:none;">Dashboard</a>
+        <a href="dashboard-owner.html" class="nav-link" id="nav-owner" style="display:none;">Dashboard</a>
+      </div>
+      <div class="navbar-right"></div>
+    </div>
+  </nav>
+
+  <main class="page-wrapper">
+    <div class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+      <div class="step-bar">
+        <div class="step-pill done"><span>✓</span>PILIH GUDANG</div>
+        <div class="step-conn done"></div>
+        <div class="step-pill done"><span>✓</span>DETAIL BOOKING</div>
+        <div class="step-conn done"></div>
+        <div class="step-pill active"><span>3</span>PEMBAYARAN</div>
+        <div class="step-conn"></div>
+        <div class="step-pill pending"><span>4</span>SELESAI</div>
+      </div>
+
+      <h1 style="color: var(--color-ink-900); font-size: 2rem; margin-bottom: 0.5rem; letter-spacing: -0.02em;">Pilih metode pembayaran</h1>
+      <p style="color: var(--color-gray-500); margin-bottom: 2.5rem;">Semua metode menggunakan sistem escrow — dana ditahan sampai check-in.</p>
+
+      <div class="pay-grid">
+        <div>
+          <div id="methods"></div>
+
+          <!-- Asuransi tambahan -->
+          <div style="margin-top:1.5rem;padding:1.25rem;border:1.5px solid var(--color-primary-mid);background:var(--color-primary-tint);border-radius:var(--radius-lg);">
+            <label style="display:flex;align-items:flex-start;gap:0.875rem;cursor:pointer;">
+              <input type="checkbox" id="add-insurance" style="width:18px;height:18px;margin-top:2px;accent-color:var(--color-primary);flex-shrink:0;" onchange="updateInsuranceTotal(this.checked)" />
+              <div>
+                <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:14px;margin-bottom:2px;">
+                  Tambah Asuransi Ekstra <span style="color:var(--color-primary);">+Rp 10.000</span>
+                </div>
+                <div style="font-size:12px;color:var(--color-gray-600);line-height:1.55;">
+                  Perlindungan barang hingga Rp 25 juta dari kebakaran, banjir &amp; pencurian.
+                  <a href="insurance.html" target="_blank" style="color:var(--color-primary);font-weight:600;white-space:nowrap;">Lihat cakupan &amp; S&amp;K →</a>
+                </div>
+              </div>
+            </label>
+          </div>
+
+          <div style="margin-top: 1.5rem; padding: 1.5rem; background: var(--color-gray-50); border-radius: var(--radius-lg); display: flex; gap: 0.75rem; align-items: flex-start;">
+            <div style="width: 36px; height: 36px; flex-shrink: 0; border-radius: 8px; background: var(--color-success-light); display: flex; align-items: center; justify-content: center;">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5L2 4V8C2 11.5 4.5 13.7 8 14.5C11.5 13.7 14 11.5 14 8V4L8 1.5Z" stroke="#15803D" stroke-width="1.5" stroke-linejoin="round"/><path d="M5.5 8L7 9.5L10.5 6" stroke="#15803D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div>
+              <h6 style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); margin-bottom: 4px;">Transaksi terenkripsi 256-bit</h6>
+              <p style="font-size: 13px; color: var(--color-gray-700); line-height: 1.6;">Data kartu dan rekening tidak pernah disimpan di server kami. Semua proses pembayaran melalui partner berlisensi OJK.</p>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; gap: 1rem; margin-top: 2rem;">
+            <a class="btn btn-outline" href="booking.html">← Kembali</a>
+            <button class="btn btn-primary btn-lg" onclick="finalizePay()">Bayar sekarang</button>
+          </div>
+        </div>
+
+        <aside>
+          <div class="summary-card" id="summary"></div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <!-- SUCCESS MODAL -->
+  <div class="modal-overlay" id="success-modal">
+    <div class="modal-card">
+      <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--color-success-light); margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center; animation: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><path d="M28 11L14 25L8 19" stroke="#15803D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h2 style="font-size: 1.5rem; color: var(--color-ink-900); margin-bottom: 0.5rem; letter-spacing: -0.02em;">Pembayaran berhasil!</h2>
+      <p style="color: var(--color-gray-600); font-size: 14px; line-height: 1.6; margin-bottom: 0.5rem;">Booking ID: <strong id="bid" style="font-family: var(--font-mono); color: var(--color-ink-900);">WH-2403</strong></p>
+      <p style="color: var(--color-gray-600); font-size: 14px; line-height: 1.6; margin-bottom: 1.5rem;">Pemilik akan konfirmasi dalam 30 menit. Notifikasi dikirim ke email kamu.</p>
+      <a href="messages.html" class="btn btn-accent" style="width:100%;justify-content:center;margin-bottom:0.75rem;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 2H2C1.45 2 1 2.45 1 3V10C1 10.55 1.45 11 2 11H5V14L8.5 11H14C14.55 11 15 10.55 15 10V3C15 2.45 14.55 2 14 2Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        Hubungi Pemilik Gudang
+      </a>
+      <div style="display: flex; gap: 0.75rem;">
+        <a href="dashboard-tenant.html" class="btn btn-primary" style="flex: 1; justify-content: center;">Ke Dashboard</a>
+        <a href="search.html" class="btn btn-outline" style="flex: 1; justify-content: center;">Cari lagi</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-logo">WareHub</div>
+        <p class="footer-desc">Marketplace sewa gudang fleksibel untuk UMKM dan online seller Indonesia. Dibangun di Jakarta, untuk seluruh nusantara.</p>
+      </div>
+      <div class="footer-col">
+        <h6>Platform</h6>
+        <ul>
+          <li><a href="search.html">Cari Gudang</a></li>
+          <li><a href="register.html?role=owner">Daftarkan Gudang</a></li>
+          <li><a href="dashboard-tenant.html">Dashboard</a></li>
+          <li><a href="messages.html">Pesan</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h6>Perusahaan</h6>
+        <ul>
+          <li><a href="#">Tentang Kami</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Karir</a></li>
+          <li><a href="#">Press Kit</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h6>Bantuan</h6>
+        <ul>
+          <li><a href="#">Pusat Bantuan</a></li>
+          <li><a href="insurance.html">Asuransi &amp; Syarat Ketentuan</a></li>
+          <li><a href="#">Kebijakan Privasi</a></li>
+          <li><a href="messages.html">Hubungi Kami</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 WareHub. Hak cipta dilindungi.</p>
+      <p>Dibuat dengan ☕ untuk UMKM Indonesia</p>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    updateNavbar();
+    const user = getCurrentUser();
+    const data = getBookingData() || { warehouseId: 1, days: 30 };
+    const w = warehouses.find(x => x.id === data.warehouseId) || warehouses[0];
+    let selected = 'transfer';
+
+    const icons = { transfer: 'BNK', qris: 'QR', gopay: 'GP', ovo: 'OV' };
+    document.getElementById('methods').innerHTML = paymentMethods.map(m => `
+      <div class="pay-method ${m.id === selected ? 'selected' : ''}" data-id="${m.id}" onclick="pickMethod('${m.id}')">
+        <div class="icon">${icons[m.id] || '$'}</div>
+        <div class="text">
+          <h6>${m.label}</h6>
+          <p>${m.desc}</p>
+        </div>
+        <div class="check"></div>
+      </div>`).join('');
+
+    function pickMethod(id) {
+      selected = id;
+      document.querySelectorAll('.pay-method').forEach(el => {
+        el.classList.toggle('selected', el.dataset.id === id);
+      });
+    }
+
+    const { subtotal, fee, total } = calcBookingPrice(w.price, data.days);
+    document.getElementById('summary').innerHTML = `
+      <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: var(--border-subtle);">
+        <img src="${w.image}" style="width: 56px; height: 56px; object-fit: cover; border-radius: 8px;" />
+        <div>
+          <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); font-size: 14px;">${w.name}</div>
+          <div style="font-size: 12px; color: var(--color-gray-500);">${w.location}</div>
+        </div>
+      </div>
+      <div class="pricing-row"><span style="color: var(--color-gray-600);">Durasi sewa</span><span style="color: var(--color-ink-900); font-weight: 600;">${data.days} hari</span></div>
+      <div class="pricing-row"><span style="color: var(--color-gray-600);">Subtotal</span><span style="color: var(--color-ink-900); font-weight: 600;">${formatRupiah(subtotal)}</span></div>
+      <div class="pricing-row"><span style="color: var(--color-gray-600);">Biaya layanan</span><span style="color: var(--color-ink-900); font-weight: 600;">${formatRupiah(fee)}</span></div>
+      <div class="pricing-row" id="ins-row" style="display:none;color:var(--color-primary-dark);"><span>Asuransi ekstra</span><span>+${formatRupiah(10000)}</span></div>
+      <div class="pricing-row total"><span>Total bayar</span><span id="pay-total-val">${formatRupiah(total)}</span></div>
+    `;
+
+    let insuranceAdded = false;
+
+    function updateInsuranceTotal(checked) {
+      insuranceAdded = checked;
+      const insRow = document.getElementById('ins-row');
+      const totalEl = document.getElementById('pay-total-val');
+      if (insRow) insRow.style.display = checked ? 'flex' : 'none';
+      if (totalEl) totalEl.textContent = formatRupiah(total + (checked ? 10000 : 0));
+    }
+
+    function finalizePay() {
+      const bookingId = 'WH-' + Math.floor(2400 + Math.random() * 100);
+      const finalTotal = total + (insuranceAdded ? 10000 : 0);
+      saveActiveBooking({ id: bookingId, warehouseId: w.id, warehouseName: w.name, days: data.days, total: finalTotal, status: 'pending', paid: true, insurance: insuranceAdded });
+      document.getElementById('bid').textContent = bookingId;
+      document.getElementById('success-modal').classList.add('show');
+      clearBookingData();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profil — WareHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <link rel="stylesheet" href="assets/css/navbar.css" />
+  <link rel="stylesheet" href="assets/css/components.css" />
+  <style>
+    body { background: var(--color-bg); }
+    .panel { background: white; border: var(--border-subtle); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.5rem; }
+    .panel-title { font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); font-size: 1rem; letter-spacing: -0.01em; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px dashed var(--color-gray-200); }
+    .field { margin-bottom: 1rem; }
+    .field label { display: block; font-size: 11px; font-family: var(--font-mono); color: var(--color-gray-500); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+    .field input, .field select { width: 100%; padding: 0.7rem 0.85rem; border: var(--border-subtle); border-radius: var(--radius-md); font-size: 14px; outline: none; font-family: inherit; background: white; }
+    .field input:focus, .field select:focus { border-color: var(--color-ink-900); }
+    .field input:read-only { background: var(--color-gray-50); color: var(--color-gray-500); cursor: not-allowed; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .avatar-circle { width: 72px; height: 72px; border-radius: 50%; background: var(--color-primary-light); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 800; font-size: 1.75rem; flex-shrink: 0; }
+    .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px dashed var(--color-gray-200); }
+    .toggle-row:last-child { border-bottom: none; }
+    .toggle-switch { position: relative; width: 40px; height: 22px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: var(--color-gray-300); border-radius: 9999px; cursor: pointer; transition: 0.2s; }
+    .toggle-slider::before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.2s; }
+    .toggle-switch input:checked + .toggle-slider { background: var(--color-primary); }
+    .toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px); }
+    .danger-zone { border-color: var(--color-danger); }
+    .danger-zone .panel-title { color: var(--color-danger); border-bottom-color: rgba(239,68,68,0.2); }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-logo">WareHub</a>
+      <div class="navbar-links">
+        <a href="index.html" class="nav-link">Beranda</a>
+        <a href="index.html#fitur" class="nav-link">Fitur</a>
+        <a href="index.html#cara-kerja" class="nav-link">Cara Kerja</a>
+        <a href="search.html" class="nav-link">Cari Gudang</a>
+        <a href="#" id="nav-dashboard" class="nav-link active">Dashboard</a>
+      </div>
+      <div class="navbar-right"></div>
+    </div>
+  </nav>
+
+  <main class="page-wrapper">
+    <div class="dash-layout" style="min-height: calc(100vh - var(--navbar-height));">
+
+      <aside class="sidebar" id="sidebar"></aside>
+
+      <section class="dash-content">
+        <div class="dash-header">
+          <div>
+            <div class="eyebrow" style="margin-bottom: 0.5rem;">Akun</div>
+            <h4 style="font-family: var(--font-display); font-weight: 800; font-size: 2rem; color: var(--color-ink-900); letter-spacing: -0.025em;">Profil</h4>
+            <p>Kelola informasi akun dan preferensi notifikasi.</p>
+          </div>
+        </div>
+
+        <!-- Profile card -->
+        <div class="panel">
+          <div style="display: flex; align-items: center; gap: 1.25rem; margin-bottom: 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px dashed var(--color-gray-200);">
+            <div class="avatar-circle" id="avatar-initials">—</div>
+            <div>
+              <div id="profile-name" style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); font-size: 1.25rem; letter-spacing: -0.01em;">—</div>
+              <div id="profile-role" style="font-size: 13px; color: var(--color-gray-500); margin-top: 2px;"></div>
+              <div style="font-family: var(--font-mono); font-size: 10px; color: var(--color-gray-400); letter-spacing: 0.06em; margin-top: 6px;">BERGABUNG SEJAK JANUARI 2026</div>
+            </div>
+          </div>
+
+          <div class="panel-title">Informasi akun</div>
+          <form id="profile-form" onsubmit="saveProfile(event)">
+            <div class="field-row">
+              <div class="field">
+                <label>Nama lengkap</label>
+                <input id="f-name" type="text" placeholder="Nama kamu" required />
+              </div>
+              <div class="field">
+                <label>Email</label>
+                <input id="f-email" type="email" placeholder="kamu@example.com" readonly />
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>No. HP</label>
+                <input id="f-phone" type="tel" placeholder="+62 812 3456 7890" />
+              </div>
+              <div class="field">
+                <label>Nama bisnis (opsional)</label>
+                <input id="f-biz" type="text" placeholder="ARTH Wear" />
+              </div>
+            </div>
+            <div class="field">
+              <label>Kota</label>
+              <select id="f-city">
+                <option>Jakarta Selatan</option>
+                <option>Jakarta Timur</option>
+                <option>Jakarta Utara</option>
+                <option>Jakarta Barat</option>
+                <option>Jakarta Pusat</option>
+                <option>Bekasi</option>
+                <option>Depok</option>
+                <option>Tangerang</option>
+              </select>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.5rem;">
+              <button type="button" class="btn btn-outline" onclick="resetForm()">Reset</button>
+              <button type="submit" class="btn btn-primary">Simpan perubahan</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Change password -->
+        <div class="panel">
+          <div class="panel-title">Ubah password</div>
+          <form onsubmit="changePassword(event)">
+            <div class="field">
+              <label>Password saat ini</label>
+              <input type="password" id="pw-current" placeholder="••••••••" />
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Password baru</label>
+                <input type="password" id="pw-new" placeholder="Min. 8 karakter" />
+              </div>
+              <div class="field">
+                <label>Konfirmasi password baru</label>
+                <input type="password" id="pw-confirm" placeholder="Ulangi password baru" />
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+              <button type="submit" class="btn btn-primary">Ubah password</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Notification preferences -->
+        <div class="panel">
+          <div class="panel-title">Preferensi notifikasi</div>
+          <div class="toggle-row">
+            <div>
+              <div style="font-size: 14px; font-weight: 600; color: var(--color-ink-900);">Notifikasi booking</div>
+              <div style="font-size: 12px; color: var(--color-gray-500); margin-top: 2px;">Konfirmasi, perubahan, dan pengingat masa sewa</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div style="font-size: 14px; font-weight: 600; color: var(--color-ink-900);">Notifikasi stok</div>
+              <div style="font-size: 12px; color: var(--color-gray-500); margin-top: 2px;">Peringatan stok kritis dan rendah</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div style="font-size: 14px; font-weight: 600; color: var(--color-ink-900);">Promo &amp; penawaran</div>
+              <div style="font-size: 12px; color: var(--color-gray-500); margin-top: 2px;">Diskon, cashback, dan promo musiman</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div style="font-size: 14px; font-weight: 600; color: var(--color-ink-900);">Email notifikasi</div>
+              <div style="font-size: 12px; color: var(--color-gray-500); margin-top: 2px;">Terima ringkasan aktivitas via email</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" /><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+
+        <!-- Danger zone -->
+        <div class="panel danger-zone">
+          <div class="panel-title">Zona bahaya</div>
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <div style="font-size: 14px; font-weight: 600; color: var(--color-ink-900);">Hapus akun</div>
+              <div style="font-size: 13px; color: var(--color-gray-500); margin-top: 2px;">Semua data, booking, dan riwayat akan dihapus permanen. Tidak bisa dibatalkan.</div>
+            </div>
+            <button class="btn btn-sm" style="background: var(--color-danger-light); color: var(--color-danger); border: 1px solid var(--color-danger);" onclick="confirmDelete()">Hapus akun</button>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    if (!requireLogin()) {}
+    updateNavbar();
+
+    const user = getCurrentUser() || { name: 'Tamu', email: '', role: 'tenant' };
+    const isOwner = user.role === 'owner';
+    const dashUrl = isOwner ? 'dashboard-owner.html' : 'dashboard-tenant.html';
+    document.getElementById('nav-dashboard').href = dashUrl;
+
+    // Populate profile
+    document.getElementById('avatar-initials').textContent = user.name.charAt(0).toUpperCase();
+    document.getElementById('profile-name').textContent = user.name;
+    document.getElementById('profile-role').textContent = isOwner ? 'Pemilik Gudang' : 'Penyewa';
+    document.getElementById('f-name').value = user.name;
+    document.getElementById('f-email').value = user.email;
+
+    function resetForm() {
+      document.getElementById('f-name').value = user.name;
+      document.getElementById('f-phone').value = '';
+      document.getElementById('f-biz').value = '';
+    }
+
+    function saveProfile(e) {
+      e.preventDefault();
+      const newName = document.getElementById('f-name').value.trim();
+      if (!newName) return;
+      user.name = newName;
+      const session = JSON.parse(localStorage.getItem('wh_user') || '{}');
+      session.name = newName;
+      localStorage.setItem('wh_user', JSON.stringify(session));
+      document.getElementById('profile-name').textContent = newName;
+      document.getElementById('avatar-initials').textContent = newName.charAt(0).toUpperCase();
+      showToast('Profil berhasil disimpan!');
+      updateNavbar();
+    }
+
+    function changePassword(e) {
+      e.preventDefault();
+      const cur = document.getElementById('pw-current').value;
+      const nw  = document.getElementById('pw-new').value;
+      const cfm = document.getElementById('pw-confirm').value;
+      if (!cur) { showToast('Masukkan password saat ini.'); return; }
+      if (nw.length < 8) { showToast('Password baru minimal 8 karakter.'); return; }
+      if (nw !== cfm) { showToast('Konfirmasi password tidak cocok.'); return; }
+      document.getElementById('pw-current').value = '';
+      document.getElementById('pw-new').value = '';
+      document.getElementById('pw-confirm').value = '';
+      showToast('Password berhasil diubah!');
+    }
+
+    function confirmDelete() {
+      if (confirm('Yakin ingin menghapus akun? Semua data akan hilang permanen.')) {
+        logout();
+      }
+    }
+
+    // Sidebar
+    const sidebarMain = isOwner ? `
+      <a class="sidebar-item" href="${dashUrl}"><img src="assets/icons/chart.svg" alt="" />Overview</a>
+      <a class="sidebar-item" href="${dashUrl}"><img src="assets/icons/warehouse.svg" alt="" />Gudang saya</a>
+      <a class="sidebar-item" href="${dashUrl}"><img src="assets/icons/calendar.svg" alt="" />Booking masuk</a>
+      <a class="sidebar-item" href="${dashUrl}"><img src="assets/icons/check.svg" alt="" />Penghasilan</a>
+    ` : `
+      <a class="sidebar-item" href="${dashUrl}"><img src="assets/icons/home.svg" alt="" />Overview</a>
+      <a class="sidebar-item" href="${dashUrl}"><img src="assets/icons/calendar.svg" alt="" />Booking aktif</a>
+      <a class="sidebar-item" href="${dashUrl}"><img src="assets/icons/check.svg" alt="" />Riwayat</a>
+      <a class="sidebar-item" href="${dashUrl}"><img src="assets/icons/box.svg" alt="" />Inventaris</a>
+    `;
+
+    const sidebarBottom = isOwner ? `
+      <div style="padding: 1.5rem; margin-top: auto;">
+        <div style="background: var(--color-ink-900); color: white; border-radius: var(--radius-lg); padding: 1rem;">
+          <div style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: rgba(255,255,255,0.5); margin-bottom: 4px;">HOST RATING</div>
+          <div style="font-family: var(--font-display); font-weight: 700; font-size: 1.5rem; letter-spacing: -0.02em;">★ 4.8</div>
+          <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 2px;">Top 5% di Jakarta</div>
+        </div>
+      </div>
+    ` : `
+      <div style="padding: 1.5rem; margin-top: auto;">
+        <div style="background: var(--color-primary-tint); border: 1px solid var(--color-primary-mid); border-radius: var(--radius-lg); padding: 1rem;">
+          <div style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: var(--color-primary-dark); margin-bottom: 4px;">PROMO MEI</div>
+          <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); font-size: 0.9rem; margin-bottom: 0.75rem;">Sewa 30+ hari, gratis 3x pickup</div>
+          <a href="search.html" class="btn btn-primary btn-sm" style="width: 100%; justify-content: center;">Cari sekarang</a>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('sidebar').innerHTML = `
+      <div style="padding: 1.5rem 1.5rem 0.75rem;">
+        <div style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: var(--color-gray-500); margin-bottom: 4px;">${isOwner ? 'PEMILIK · HOST' : 'PENYEWA'}</div>
+        <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); letter-spacing: -0.01em;">${user.name}</div>
+      </div>
+      <div class="sidebar-section-label">MAIN</div>
+      ${sidebarMain}
+      <div class="sidebar-section-label" style="margin-top: 1rem;">AKUN</div>
+      <a class="sidebar-item" href="notifikasi.html"><img src="assets/icons/bell.svg" alt="" />Notifikasi</a>
+      <a class="sidebar-item active" href="profil.html"><img src="assets/icons/user.svg" alt="" />Profil</a>
+      ${sidebarBottom}
+    `;
+  </script>
+</body>
+</html>

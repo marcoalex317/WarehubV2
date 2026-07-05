@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Pemilik — WareHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <link rel="stylesheet" href="assets/css/navbar.css" />
+  <link rel="stylesheet" href="assets/css/components.css" />
+  <style>
+    body { background: var(--color-bg); }
+    .stat-card { background: white; border: var(--border-subtle); border-radius: var(--radius-lg); padding: 1.5rem; }
+    .stat-card .lbl { font-size: 11px; font-family: var(--font-mono); color: var(--color-gray-500); letter-spacing: 0.06em; text-transform: uppercase; }
+    .stat-card .val { font-family: var(--font-display); font-weight: 800; font-size: 2rem; color: var(--color-ink-900); margin-top: 6px; letter-spacing: -0.025em; }
+    .stat-card .delta { font-size: 12px; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+    .delta.up { color: var(--color-success); }
+    .delta.down { color: var(--color-danger); }
+    .panel { background: white; border: var(--border-subtle); border-radius: var(--radius-lg); padding: 1.5rem; }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+    .panel-head h3 { font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); font-size: 1.0625rem; letter-spacing: -0.01em; }
+    .listing-row { display: grid; grid-template-columns: 1fr 100px 100px 120px 100px; gap: 1rem; align-items: center; padding: 0.875rem 0; border-bottom: 1px dashed var(--color-gray-200); }
+    .listing-row:last-child { border: none; }
+    /* chart */
+    .chart { display: flex; align-items: flex-end; gap: 12px; height: 180px; padding: 0 0.5rem; margin-bottom: 0.75rem; }
+    .chart .bar { flex: 1; background: linear-gradient(to top, var(--color-primary), var(--color-primary-mid)); border-radius: 6px 6px 0 0; position: relative; transition: opacity 0.2s; }
+    .chart .bar:hover { opacity: 0.8; }
+    .chart .bar.muted { background: var(--color-gray-200); }
+    .chart .bar .lbl { position: absolute; bottom: -22px; left: 0; right: 0; text-align: center; font-size: 10px; font-family: var(--font-mono); color: var(--color-gray-500); }
+    .chart .bar .val { position: absolute; top: -20px; left: 0; right: 0; text-align: center; font-size: 10px; font-family: var(--font-mono); color: var(--color-ink-900); font-weight: 600; }
+    /* notifikasi */
+    .notif-item { display: flex; gap: 0.875rem; padding: 1rem 0.5rem; border-bottom: 1px dashed var(--color-gray-200); cursor: pointer; border-radius: 8px; transition: background 0.15s; margin: 0 -0.5rem; }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-item:hover { background: var(--color-gray-50); }
+    .notif-item.read { opacity: 0.6; }
+    .notif-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+    .notif-icon.booking { background: var(--color-primary-light); }
+    .notif-icon.stok { background: var(--color-warning-light); }
+    .notif-icon.promo { background: var(--color-success-light); }
+    .notif-icon.sistem { background: var(--color-gray-100); }
+    /* profil */
+    .panel-title { font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); font-size: 1rem; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px dashed var(--color-gray-200); }
+    .pf-field { margin-bottom: 1rem; }
+    .pf-field label { display: block; font-size: 11px; font-family: var(--font-mono); color: var(--color-gray-500); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+    .pf-field input, .pf-field select { width: 100%; padding: 0.7rem 0.85rem; border: var(--border-subtle); border-radius: var(--radius-md); font-size: 14px; outline: none; font-family: inherit; background: white; }
+    .pf-field input:focus, .pf-field select:focus { border-color: var(--color-ink-900); }
+    .pf-field input[readonly] { background: var(--color-gray-50); color: var(--color-gray-500); cursor: not-allowed; }
+    .pf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px dashed var(--color-gray-200); }
+    .toggle-row:last-child { border-bottom: none; }
+    .toggle-switch { position: relative; width: 40px; height: 22px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: var(--color-gray-300); border-radius: 9999px; cursor: pointer; transition: 0.2s; }
+    .toggle-slider::before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.2s; }
+    .toggle-switch input:checked + .toggle-slider { background: var(--color-primary); }
+    .toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px); }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-logo"><img src="assets/images/logo.png" alt="WareHub" /></a>
+      <div class="navbar-links">
+        <a href="index.html" class="nav-link">Beranda</a>
+        <a href="index.html#fitur" class="nav-link">Fitur</a>
+        <a href="index.html#cara-kerja" class="nav-link">Cara Kerja</a>
+        <a href="search.html" class="nav-link">Cari Gudang</a>
+        <a href="dashboard-tenant.html" class="nav-link" id="nav-tenant" style="display:none;">Dashboard</a>
+        <a href="dashboard-owner.html" class="nav-link active" id="nav-owner" style="display:none;">Dashboard</a>
+      </div>
+      <div class="navbar-right"></div>
+    </div>
+  </nav>
+
+  <main class="page-wrapper">
+    <div class="dash-layout" style="min-height: calc(100vh - var(--navbar-height));">
+
+      <aside class="sidebar">
+        <div style="padding: 1.5rem 1.5rem 0.75rem;">
+          <div style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: var(--color-gray-500); margin-bottom: 4px;">PEMILIK · HOST</div>
+          <div id="user-name" style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); letter-spacing: -0.01em;">—</div>
+        </div>
+
+        <div class="sidebar-section-label">MAIN</div>
+        <a class="sidebar-item active" data-tab="tab-overview"><img src="assets/icons/chart.svg" alt="" />Overview</a>
+        <a class="sidebar-item" data-tab="tab-listings"><img src="assets/icons/warehouse.svg" alt="" />Gudang saya</a>
+        <a class="sidebar-item" data-tab="tab-bookings"><img src="assets/icons/calendar.svg" alt="" />Booking masuk</a>
+        <a class="sidebar-item" data-tab="tab-earnings"><img src="assets/icons/check.svg" alt="" />Penghasilan</a>
+
+        <div class="sidebar-section-label" style="margin-top: 1rem;">KOMUNIKASI</div>
+        <a class="sidebar-item" href="messages.html">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 2H2C1.45 2 1 2.45 1 3V10C1 10.55 1.45 11 2 11H5V14L8.5 11H14C14.55 11 15 10.55 15 10V3C15 2.45 14.55 2 14 2Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+          Pesan
+        </a>
+
+        <div class="sidebar-section-label" style="margin-top: 1rem;">AKUN</div>
+        <a class="sidebar-item" data-tab="tab-notif"><img src="assets/icons/bell.svg" alt="" />Notifikasi</a>
+        <a class="sidebar-item" data-tab="tab-profil"><img src="assets/icons/user.svg" alt="" />Profil</a>
+
+        <div style="padding: 1.5rem; margin-top: auto;">
+          <div style="background: var(--color-ink-900); color: white; border-radius: var(--radius-lg); padding: 1rem;">
+            <div style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: rgba(255,255,255,0.5); margin-bottom: 4px;">HOST RATING</div>
+            <div style="font-family: var(--font-display); font-weight: 700; font-size: 1.5rem; letter-spacing: -0.02em;">★ 4.8</div>
+            <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 2px;">Top 5% di Jakarta</div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="dash-content">
+
+        <!-- OVERVIEW -->
+        <div id="tab-overview" class="tab-content">
+          <div class="dash-header">
+            <div>
+              <div class="eyebrow" style="margin-bottom: 0.5rem;">Overview</div>
+              <h4 id="welcome" style="font-family: var(--font-display); font-weight: 800; font-size: 2rem; color: var(--color-ink-900); letter-spacing: -0.025em;">Halo!</h4>
+              <p>Ringkasan performa gudangmu di bulan Mei 2026.</p>
+            </div>
+            <button class="btn btn-primary">+ Tambah gudang</button>
+          </div>
+
+          <div class="grid grid-4 gap-4" style="margin-bottom: 2rem;">
+            <div class="stat-card">
+              <div class="lbl">Penghasilan Bulan Ini</div>
+              <div class="val">Rp 3,9jt</div>
+              <div class="delta up">↑ 12% bulan lalu</div>
+            </div>
+            <div class="stat-card">
+              <div class="lbl">Booking Aktif</div>
+              <div class="val">8</div>
+              <div class="delta up">↑ 2 minggu ini</div>
+            </div>
+            <div class="stat-card">
+              <div class="lbl">Tingkat Hunian</div>
+              <div class="val">85%</div>
+              <div class="delta up">Target 80%</div>
+            </div>
+            <div class="stat-card">
+              <div class="lbl">Rating Pemilik</div>
+              <div class="val">4.8</div>
+              <div class="delta up">↑ dari 4.6</div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div class="panel">
+              <div class="panel-head">
+                <h3>Penghasilan 6 bulan terakhir</h3>
+                <select style="border: var(--border-subtle); padding: 6px 12px; border-radius: 8px; font-size: 12px; outline: none;">
+                  <option>Semua gudang</option>
+                  <option>Gudang Cawang</option>
+                  <option>Ruang Kemang</option>
+                </select>
+              </div>
+              <div class="chart">
+                <div class="bar muted" style="height:45%;"><span class="lbl">DES</span><span class="val">2.1jt</span></div>
+                <div class="bar muted" style="height:55%;"><span class="lbl">JAN</span><span class="val">2.6jt</span></div>
+                <div class="bar muted" style="height:60%;"><span class="lbl">FEB</span><span class="val">2.9jt</span></div>
+                <div class="bar muted" style="height:70%;"><span class="lbl">MAR</span><span class="val">3.4jt</span></div>
+                <div class="bar muted" style="height:75%;"><span class="lbl">APR</span><span class="val">3.5jt</span></div>
+                <div class="bar" style="height:85%;"><span class="lbl">MEI</span><span class="val">3.9jt</span></div>
+              </div>
+              <div style="font-size:11px;color:var(--color-gray-500);padding-top:1rem;border-top:1px dashed var(--color-gray-200);margin-top:1.5rem;display:flex;justify-content:space-between;">
+                <span>Total 6 bulan: <strong style="color:var(--color-ink-900);">Rp 18,4jt</strong></span>
+                <span>Komisi WareHub: <strong style="color:var(--color-ink-900);">Rp 920K</strong></span>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <h3>Perlu konfirmasi</h3>
+                <span class="badge" style="background:var(--color-warning-light);color:var(--color-warning);">2 baru</span>
+              </div>
+              <div id="pending-list"></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Gudang saya</h3>
+              <a href="#" onclick="switchTab('tab-listings');return false;" style="color:var(--color-primary);font-size:13px;font-weight:600;">Kelola →</a>
+            </div>
+            <div style="font-size:11px;font-family:var(--font-mono);color:var(--color-gray-500);letter-spacing:0.06em;padding-bottom:0.75rem;border-bottom:1px solid var(--color-gray-200);display:grid;grid-template-columns:1fr 100px 100px 120px 100px;gap:1rem;">
+              <span>NAMA</span><span>UKURAN</span><span style="text-align:right;">HARGA/HARI</span><span>HUNIAN</span><span>STATUS</span>
+            </div>
+            <div id="listings-list"></div>
+          </div>
+        </div>
+
+        <!-- LISTINGS -->
+        <div id="tab-listings" class="tab-content hidden">
+          <div class="dash-header">
+            <div>
+              <div class="eyebrow" style="margin-bottom: 0.5rem;">Gudang</div>
+              <h4 style="font-family:var(--font-display);font-weight:800;font-size:2rem;color:var(--color-ink-900);letter-spacing:-0.025em;">Gudang saya</h4>
+              <p>Kelola listing, harga, dan ketersediaan.</p>
+            </div>
+            <button class="btn btn-primary">+ Tambah gudang</button>
+          </div>
+          <div class="grid grid-3 gap-4" id="listings-grid"></div>
+        </div>
+
+        <!-- BOOKINGS -->
+        <div id="tab-bookings" class="tab-content hidden">
+          <div class="dash-header">
+            <div>
+              <div class="eyebrow" style="margin-bottom: 0.5rem;">Booking</div>
+              <h4 style="font-family:var(--font-display);font-weight:800;font-size:2rem;color:var(--color-ink-900);letter-spacing:-0.025em;">Booking masuk</h4>
+              <p>Konfirmasi atau tolak permintaan sewa.</p>
+            </div>
+          </div>
+          <div class="panel" id="full-bookings"></div>
+        </div>
+
+        <!-- EARNINGS -->
+        <div id="tab-earnings" class="tab-content hidden">
+          <div class="dash-header">
+            <div>
+              <div class="eyebrow" style="margin-bottom: 0.5rem;">Penghasilan</div>
+              <h4 style="font-family:var(--font-display);font-weight:800;font-size:2rem;color:var(--color-ink-900);letter-spacing:-0.025em;">Penghasilan</h4>
+              <p>Riwayat semua transaksi yang masuk ke kamu.</p>
+            </div>
+            <button class="btn btn-outline">Export CSV</button>
+          </div>
+          <div class="panel">
+            <table style="width:100%;border-collapse:collapse;font-size:14px;">
+              <thead>
+                <tr style="text-align:left;font-size:11px;font-family:var(--font-mono);color:var(--color-gray-500);letter-spacing:0.06em;">
+                  <th style="padding:0 0 0.75rem;">TANGGAL</th>
+                  <th>PENYEWA</th>
+                  <th>GUDANG</th>
+                  <th style="text-align:right;">BRUTO</th>
+                  <th style="text-align:right;">KOMISI 5%</th>
+                  <th style="text-align:right;">DITERIMA</th>
+                </tr>
+              </thead>
+              <tbody id="earnings-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB NOTIF -->
+        <div id="tab-notif" class="tab-content hidden">
+          <div class="dash-header">
+            <div>
+              <div class="eyebrow" style="margin-bottom: 0.5rem;">Akun</div>
+              <h4 style="font-family:var(--font-display);font-weight:800;font-size:2rem;color:var(--color-ink-900);letter-spacing:-0.025em;">Notifikasi</h4>
+              <p>Update real-time soal booking dan performa gudang.</p>
+            </div>
+            <button class="btn btn-outline" onclick="markAllRead()">Tandai semua dibaca</button>
+          </div>
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;" id="notif-chips">
+            <button class="filter-chip active" onclick="filterNotif('semua',this)">Semua</button>
+            <button class="filter-chip" onclick="filterNotif('booking',this)">Booking</button>
+            <button class="filter-chip" onclick="filterNotif('penghasilan',this)">Penghasilan</button>
+            <button class="filter-chip" onclick="filterNotif('promo',this)">Promo</button>
+            <button class="filter-chip" onclick="filterNotif('sistem',this)">Sistem</button>
+          </div>
+          <div class="panel" id="full-notif"></div>
+        </div>
+
+        <!-- TAB PROFIL -->
+        <div id="tab-profil" class="tab-content hidden">
+          <div class="dash-header">
+            <div>
+              <div class="eyebrow" style="margin-bottom: 0.5rem;">Akun</div>
+              <h4 style="font-family:var(--font-display);font-weight:800;font-size:2rem;color:var(--color-ink-900);letter-spacing:-0.025em;">Profil</h4>
+              <p>Kelola informasi akun dan preferensi notifikasi.</p>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-bottom:1.5rem;">
+            <div style="display:flex;align-items:center;gap:1.25rem;margin-bottom:1.5rem;padding-bottom:1.25rem;border-bottom:1px dashed var(--color-gray-200);">
+              <div id="pf-avatar" style="width:72px;height:72px;border-radius:50%;background:var(--color-primary-light);color:var(--color-primary);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:800;font-size:1.75rem;flex-shrink:0;">—</div>
+              <div>
+                <div id="pf-name-display" style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:1.25rem;letter-spacing:-0.01em;">—</div>
+                <div style="font-size:13px;color:var(--color-gray-500);margin-top:2px;">Pemilik Gudang</div>
+                <div style="font-family:var(--font-mono);font-size:10px;color:var(--color-gray-400);letter-spacing:0.06em;margin-top:6px;">BERGABUNG SEJAK JANUARI 2026</div>
+              </div>
+            </div>
+            <div class="panel-title">Informasi akun</div>
+            <form onsubmit="saveProfil(event)">
+              <div class="pf-row">
+                <div class="pf-field">
+                  <label>Nama lengkap</label>
+                  <input id="pf-name" type="text" placeholder="Nama kamu" required />
+                </div>
+                <div class="pf-field">
+                  <label>Email</label>
+                  <input id="pf-email" type="email" readonly />
+                </div>
+              </div>
+              <div class="pf-row">
+                <div class="pf-field">
+                  <label>No. HP</label>
+                  <input id="pf-phone" type="tel" placeholder="+62 812 3456 7890" />
+                </div>
+                <div class="pf-field">
+                  <label>Nama usaha (opsional)</label>
+                  <input id="pf-biz" type="text" placeholder="Gudang Sejahtera" />
+                </div>
+              </div>
+              <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:0.5rem;">
+                <button type="button" class="btn btn-outline" onclick="resetProfil()">Reset</button>
+                <button type="submit" class="btn btn-primary">Simpan perubahan</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="panel" style="margin-bottom:1.5rem;">
+            <div class="panel-title">Ubah password</div>
+            <form onsubmit="changePw(event)">
+              <div class="pf-field">
+                <label>Password saat ini</label>
+                <input type="password" id="pw-cur" placeholder="••••••••" />
+              </div>
+              <div class="pf-row">
+                <div class="pf-field">
+                  <label>Password baru</label>
+                  <input type="password" id="pw-new" placeholder="Min. 8 karakter" />
+                </div>
+                <div class="pf-field">
+                  <label>Konfirmasi password baru</label>
+                  <input type="password" id="pw-cfm" placeholder="Ulangi password baru" />
+                </div>
+              </div>
+              <div style="display:flex;justify-content:flex-end;margin-top:0.5rem;">
+                <button type="submit" class="btn btn-primary">Ubah password</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="panel" style="margin-bottom:1.5rem;">
+            <div class="panel-title">Preferensi notifikasi</div>
+            <div class="toggle-row">
+              <div>
+                <div style="font-size:14px;font-weight:600;color:var(--color-ink-900);">Notifikasi booking</div>
+                <div style="font-size:12px;color:var(--color-gray-500);margin-top:2px;">Permintaan masuk, konfirmasi, dan pembatalan</div>
+              </div>
+              <label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <div style="font-size:14px;font-weight:600;color:var(--color-ink-900);">Notifikasi penghasilan</div>
+                <div style="font-size:12px;color:var(--color-gray-500);margin-top:2px;">Dana masuk dan ringkasan bulanan</div>
+              </div>
+              <label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <div style="font-size:14px;font-weight:600;color:var(--color-ink-900);">Promo &amp; tips host</div>
+                <div style="font-size:12px;color:var(--color-gray-500);margin-top:2px;">Tips meningkatkan hunian dan promo platform</div>
+              </div>
+              <label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <div style="font-size:14px;font-weight:600;color:var(--color-ink-900);">Email notifikasi</div>
+                <div style="font-size:12px;color:var(--color-gray-500);margin-top:2px;">Terima ringkasan aktivitas via email</div>
+              </div>
+              <label class="toggle-switch"><input type="checkbox" /><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+
+          <div class="panel" style="border-color:var(--color-danger);">
+            <div class="panel-title" style="color:var(--color-danger);border-bottom-color:rgba(239,68,68,0.2);">Zona bahaya</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+              <div>
+                <div style="font-size:14px;font-weight:600;color:var(--color-ink-900);">Hapus akun</div>
+                <div style="font-size:13px;color:var(--color-gray-500);margin-top:2px;">Semua listing, data, dan riwayat penghasilan akan dihapus permanen.</div>
+              </div>
+              <button class="btn btn-sm" style="background:var(--color-danger-light);color:var(--color-danger);border:1px solid var(--color-danger);" onclick="if(confirm('Yakin ingin hapus akun?')) logout()">Hapus akun</button>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    if (!requireLogin()) {} else if (getCurrentRole() === 'tenant') { window.location.href = 'dashboard-tenant.html'; }
+    updateNavbar();
+    initSidebar();
+
+    const user = getCurrentUser() || { name: 'Tamu', email: '' };
+    document.getElementById('user-name').textContent = user.name;
+    document.getElementById('welcome').textContent = `Halo, ${user.name.split(' ')[0]}!`;
+
+    function switchTab(id) {
+      document.querySelectorAll('.sidebar-item').forEach(s => s.classList.toggle('active', s.dataset.tab === id));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.toggle('hidden', t.id !== id));
+    }
+
+    // ── Pending bookings ──
+    const pendingBookings = incomingBookings.filter(b => b.status === 'pending');
+    document.getElementById('pending-list').innerHTML = pendingBookings.map(b => `
+      <div style="padding:0.75rem 0;border-bottom:1px dashed var(--color-gray-200);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem;">
+          <div>
+            <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:14px;">${b.tenant}</div>
+            <div style="font-size:12px;color:var(--color-gray-500);margin-top:2px;">${b.warehouse} · ${b.size} · ${b.period}</div>
+          </div>
+          <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:14px;">${formatRupiah(b.total)}</div>
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+          <button class="btn btn-primary btn-sm" style="flex:1;justify-content:center;" onclick="showToast('Booking dikonfirmasi!');this.closest('div').parentElement.style.opacity=0.4;">Terima</button>
+          <button class="btn btn-outline btn-sm" style="flex:1;justify-content:center;">Tolak</button>
+        </div>
+      </div>`).join('') || '<p style="color:var(--color-gray-500);font-size:13px;text-align:center;padding:1rem;">Tidak ada permintaan baru.</p>';
+
+    // ── Listings table (overview) ──
+    document.getElementById('listings-list').innerHTML = ownerListings.map(l => {
+      const statusBadge = l.status === 'active'
+        ? `<span class="badge badge-success"><span class="dot dot-success"></span>Aktif</span>`
+        : `<span class="badge" style="background:var(--color-warning-light);color:var(--color-warning);"><span class="dot" style="background:var(--color-warning);"></span>Pending</span>`;
+      const occCls = l.occupancy >= 80 ? 'success' : l.occupancy >= 50 ? 'warning' : 'danger';
+      return `
+        <div class="listing-row">
+          <div>
+            <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:14px;">${l.name}</div>
+            <div style="font-size:12px;color:var(--color-gray-500);">${l.location}</div>
+          </div>
+          <div style="font-size:13px;color:var(--color-gray-700);">${l.size}</div>
+          <div style="text-align:right;font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);">${formatRupiah(l.price)}</div>
+          <div>
+            <div style="font-size:12px;color:var(--color-gray-700);margin-bottom:2px;">${l.occupancy}%</div>
+            <div class="progress-bar"><div class="progress-fill ${occCls}" style="width:${l.occupancy}%;"></div></div>
+          </div>
+          <div>${statusBadge}</div>
+        </div>`;
+    }).join('');
+
+    // ── Listings grid (full tab) ──
+    document.getElementById('listings-grid').innerHTML = ownerListings.map((l, i) => {
+      const w = warehouses[i] || warehouses[0];
+      const statusBadge = l.status === 'active'
+        ? `<span class="badge badge-success"><span class="dot dot-success"></span>Aktif</span>`
+        : `<span class="badge" style="background:var(--color-warning-light);color:var(--color-warning);">Pending</span>`;
+      return `
+        <div class="card warehouse-card">
+          <div class="warehouse-card-availability">${statusBadge}</div>
+          <img src="${w.image}" alt="" class="warehouse-card-img" />
+          <div class="card-body">
+            <div class="warehouse-card-name">${l.name}</div>
+            <div class="warehouse-card-loc"><img src="assets/icons/location.svg" alt="" />${l.location}</div>
+            <div class="warehouse-card-tags"><span class="badge badge-gray">${l.size}</span><span class="badge badge-gray">Hunian ${l.occupancy}%</span></div>
+            <div class="warehouse-card-bottom">
+              <div class="warehouse-price">${formatRupiah(l.price)}<span> /hari</span></div>
+              <button class="btn btn-outline btn-sm">Edit</button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
+    // ── Bookings tab ──
+    document.getElementById('full-bookings').innerHTML = incomingBookings.map(b => {
+      const status = b.status === 'pending'
+        ? `<span class="badge" style="background:var(--color-warning-light);color:var(--color-warning);">Pending</span>`
+        : `<span class="badge badge-success">Aktif</span>`;
+      return `
+        <div style="display:grid;grid-template-columns:36px 1fr auto auto;gap:1rem;align-items:center;padding:0.875rem 0;border-bottom:1px dashed var(--color-gray-200);">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--color-primary-light);color:var(--color-primary);display:flex;align-items:center;justify-content:center;font-weight:700;">${b.tenant.charAt(0)}</div>
+          <div>
+            <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:14px;">${b.tenant}</div>
+            <div style="font-size:12px;color:var(--color-gray-500);">${b.warehouse} · ${b.size} · ${b.period}</div>
+          </div>
+          <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);">${formatRupiah(b.total)}</div>
+          ${status}
+        </div>`;
+    }).join('');
+
+    // ── Earnings table ──
+    document.getElementById('earnings-tbody').innerHTML = earnings.map(e => `
+      <tr style="border-bottom:1px dashed var(--color-gray-200);">
+        <td style="padding:0.875rem 0;font-family:var(--font-mono);font-size:12px;color:var(--color-gray-500);">${e.date.toUpperCase()}</td>
+        <td style="font-weight:600;color:var(--color-ink-900);">${e.tenant}</td>
+        <td style="color:var(--color-gray-600);">${e.warehouse}</td>
+        <td style="text-align:right;color:var(--color-gray-600);">${formatRupiah(e.gross)}</td>
+        <td style="text-align:right;color:var(--color-danger);">−${formatRupiah(e.commission)}</td>
+        <td style="text-align:right;font-family:var(--font-display);font-weight:700;color:var(--color-success);">${formatRupiah(e.net)}</td>
+      </tr>`).join('');
+
+    // ── Notifications ──
+    const allNotifs = [
+      { id:1, type:'booking',     icon:'📦', title:'Booking baru masuk',      message:'ARTH Wear mengajukan booking Gudang Cawang 20 m² untuk 15–22 Mei. Segera konfirmasi.', time:'10 menit lalu', read:false },
+      { id:2, type:'booking',     icon:'📦', title:'Booking baru masuk',      message:'Toko Skincare mengajukan booking Ruang Kemang 10 m² untuk 20–27 Mei.', time:'1 jam lalu', read:false },
+      { id:3, type:'penghasilan', icon:'💰', title:'Dana masuk',              message:'Dana Rp 2.422.500 dari ARTH Wear (Gudang Cawang Mei) berhasil dicairkan ke rekening kamu.', time:'2 hari lalu', read:true },
+      { id:4, type:'promo',       icon:'🎉', title:'Tips host: tingkatkan rating', message:'Gudang dengan foto berkualitas tinggi mendapat 2x lebih banyak booking. Perbarui foto gudangmu sekarang.', time:'3 hari lalu', read:true },
+      { id:5, type:'penghasilan', icon:'💰', title:'Ringkasan April 2026',    message:'Total penghasilan April: Rp 3.535.000. Tingkat hunian: 82%. Lihat laporan lengkap di tab Penghasilan.', time:'5 hari lalu', read:true },
+      { id:6, type:'booking',     icon:'📦', title:'Booking selesai',         message:'Masa sewa Fashion Tanah Abang di Gudang Cawang (1–30 Apr) telah berakhir. Rating bintang 5 diterima!', time:'1 minggu lalu', read:true },
+      { id:7, type:'sistem',      icon:'🔔', title:'Verifikasi host berhasil', message:'Akun host kamu telah terverifikasi. Gudangmu kini muncul di hasil pencarian prioritas.', time:'2 minggu lalu', read:true },
+    ];
+    let activeNotifFilter = 'semua';
+
+    function renderFullNotif() {
+      const filtered = activeNotifFilter === 'semua' ? allNotifs : allNotifs.filter(n => n.type === activeNotifFilter);
+      if (!filtered.length) {
+        document.getElementById('full-notif').innerHTML = '<div style="text-align:center;padding:3rem;color:var(--color-gray-400);"><div style="font-size:2rem;margin-bottom:0.75rem;">🔔</div><div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);margin-bottom:0.5rem;">Tidak ada notifikasi</div></div>';
+        return;
+      }
+      document.getElementById('full-notif').innerHTML = filtered.map(n => `
+        <div class="notif-item ${n.read ? 'read' : ''}" onclick="markRead(${n.id},this)">
+          <div style="width:7px;height:7px;border-radius:50%;background:${n.read ? 'transparent' : 'var(--color-primary)'};flex-shrink:0;margin-top:8px;"></div>
+          <div class="notif-icon ${n.type}">${n.icon}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:3px;">
+              <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:14px;">${n.title}</div>
+              <div style="font-family:var(--font-mono);font-size:10px;color:var(--color-gray-400);white-space:nowrap;">${n.time.toUpperCase()}</div>
+            </div>
+            <p style="font-size:13px;color:var(--color-gray-700);line-height:1.55;margin:0;">${n.message}</p>
+          </div>
+        </div>`).join('');
+    }
+
+    function filterNotif(type, btn) {
+      activeNotifFilter = type;
+      document.querySelectorAll('#notif-chips .filter-chip').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      renderFullNotif();
+    }
+
+    function markRead(id, el) {
+      const n = allNotifs.find(x => x.id === id);
+      if (n) { n.read = true; el.classList.add('read'); el.querySelector('div').style.background = 'transparent'; }
+    }
+
+    function markAllRead() {
+      allNotifs.forEach(n => n.read = true);
+      renderFullNotif();
+      showToast('Semua notifikasi ditandai sudah dibaca.');
+    }
+
+    renderFullNotif();
+
+    // ── Profil ──
+    document.getElementById('pf-avatar').textContent = user.name.charAt(0).toUpperCase();
+    document.getElementById('pf-name-display').textContent = user.name;
+    document.getElementById('pf-name').value = user.name;
+    document.getElementById('pf-email').value = user.email;
+
+    function saveProfil(e) {
+      e.preventDefault();
+      const newName = document.getElementById('pf-name').value.trim();
+      if (!newName) return;
+      const session = JSON.parse(localStorage.getItem('wh_user') || '{}');
+      session.name = newName;
+      localStorage.setItem('wh_user', JSON.stringify(session));
+      document.getElementById('pf-name-display').textContent = newName;
+      document.getElementById('pf-avatar').textContent = newName.charAt(0).toUpperCase();
+      document.getElementById('user-name').textContent = newName;
+      showToast('Profil berhasil disimpan!');
+      updateNavbar();
+    }
+
+    function resetProfil() {
+      document.getElementById('pf-name').value = user.name;
+      document.getElementById('pf-phone').value = '';
+      document.getElementById('pf-biz').value = '';
+    }
+
+    function changePw(e) {
+      e.preventDefault();
+      const cur = document.getElementById('pw-cur').value;
+      const nw  = document.getElementById('pw-new').value;
+      const cfm = document.getElementById('pw-cfm').value;
+      if (!cur) { showToast('Masukkan password saat ini.'); return; }
+      if (nw.length < 8) { showToast('Password baru minimal 8 karakter.'); return; }
+      if (nw !== cfm) { showToast('Konfirmasi password tidak cocok.'); return; }
+      document.getElementById('pw-cur').value = '';
+      document.getElementById('pw-new').value = '';
+      document.getElementById('pw-cfm').value = '';
+      showToast('Password berhasil diubah!');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Booking — WareHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <link rel="stylesheet" href="assets/css/navbar.css" />
+  <link rel="stylesheet" href="assets/css/components.css" />
+  <style>
+    .step-bar { display: flex; align-items: center; gap: 1rem; margin-bottom: 2.5rem; }
+    .step-pill { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.75rem; border-radius: 9999px; font-size: 12px; font-family: var(--font-mono); letter-spacing: 0.05em; }
+    .step-pill.active { background: var(--color-ink-900); color: white; }
+    .step-pill.done { background: var(--color-success-light); color: var(--color-success); }
+    .step-pill.pending { background: var(--color-gray-100); color: var(--color-gray-500); }
+    .step-conn { flex: 1; height: 1px; background: var(--color-gray-200); }
+    .step-conn.done { background: var(--color-success); }
+    .booking-grid { display: grid; grid-template-columns: 1fr 380px; gap: 3rem; align-items: start; }
+    .form-card { background: white; border: var(--border-subtle); border-radius: var(--radius-xl); padding: 2rem; margin-bottom: 1.5rem; }
+    .form-card h3 { font-family: var(--font-display); font-weight: 700; font-size: 1.125rem; color: var(--color-ink-900); margin-bottom: 1.25rem; letter-spacing: -0.01em; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .field { margin-bottom: 1rem; }
+    .field label { display: block; font-size: 11px; font-family: var(--font-mono); color: var(--color-gray-500); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+    .field input, .field textarea, .field select { width: 100%; padding: 0.7rem 0.85rem; border: var(--border-subtle); border-radius: var(--radius-md); font-size: 14px; outline: none; font-family: inherit; }
+    .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--color-ink-900); }
+    .summary-card { position: sticky; top: calc(var(--navbar-height) + 1.5rem); background: white; border: var(--border-subtle); border-radius: var(--radius-xl); overflow: hidden; }
+    .summary-img { height: 160px; position: relative; overflow: hidden; }
+    .summary-img img { width: 100%; height: 100%; object-fit: cover; }
+    .summary-body { padding: 1.5rem; }
+    .pricing-row { display: flex; justify-content: space-between; padding: 0.45rem 0; font-size: 14px; }
+    .pricing-row.total { padding-top: 0.75rem; border-top: 1px dashed var(--color-gray-300); margin-top: 0.5rem; font-family: var(--font-display); font-weight: 700; font-size: 1.125rem; color: var(--color-ink-900); }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-logo"><img src="assets/images/logo.png" alt="WareHub" /></a>
+      <div class="navbar-links">
+        <a href="index.html" class="nav-link">Beranda</a>
+        <a href="index.html#fitur" class="nav-link">Fitur</a>
+        <a href="index.html#cara-kerja" class="nav-link">Cara Kerja</a>
+        <a href="search.html" class="nav-link">Cari Gudang</a>
+        <a href="dashboard-tenant.html" class="nav-link" id="nav-tenant" style="display:none;">Dashboard</a>
+        <a href="dashboard-owner.html" class="nav-link" id="nav-owner" style="display:none;">Dashboard</a>
+      </div>
+      <div class="navbar-right"></div>
+    </div>
+  </nav>
+
+  <main class="page-wrapper">
+    <div class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+      <div class="step-bar">
+        <div class="step-pill done"><span>✓</span>PILIH GUDANG</div>
+        <div class="step-conn done"></div>
+        <div class="step-pill active"><span>2</span>DETAIL BOOKING</div>
+        <div class="step-conn"></div>
+        <div class="step-pill pending"><span>3</span>PEMBAYARAN</div>
+        <div class="step-conn"></div>
+        <div class="step-pill pending"><span>4</span>SELESAI</div>
+      </div>
+
+      <h1 style="color: var(--color-ink-900); font-size: 2rem; margin-bottom: 0.5rem; letter-spacing: -0.02em;">Detail booking</h1>
+      <p style="color: var(--color-gray-500); margin-bottom: 2.5rem;">Konfirmasi tanggal, masukkan info penyewa, dan lanjut ke pembayaran.</p>
+
+      <div class="booking-grid">
+        <div>
+          <div class="form-card">
+            <h3>Periode sewa</h3>
+            <div class="field-row">
+              <div class="field">
+                <label>Check-in</label>
+                <input id="b-start" type="date" />
+              </div>
+              <div class="field">
+                <label>Check-out</label>
+                <input id="b-end" type="date" readonly />
+              </div>
+            </div>
+            <div class="field">
+              <label>Durasi</label>
+              <select id="b-dur">
+                <option value="1">1 hari</option>
+                <option value="7">1 minggu</option>
+                <option value="14">2 minggu</option>
+                <option value="30" selected>1 bulan (30 hari)</option>
+                <option value="90">3 bulan (90 hari)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-card">
+            <h3>Informasi penyewa</h3>
+            <div class="field-row">
+              <div class="field">
+                <label>Nama lengkap</label>
+                <input id="b-name" type="text" placeholder="Nama penyewa" />
+              </div>
+              <div class="field">
+                <label>Nama bisnis (opsional)</label>
+                <input id="b-biz" type="text" placeholder="ARTH Wear" />
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Email</label>
+                <input id="b-email" type="email" placeholder="kamu@example.com" />
+              </div>
+              <div class="field">
+                <label>No. HP</label>
+                <input id="b-phone" type="tel" placeholder="+62 812 3456 7890" />
+              </div>
+            </div>
+            <div class="field">
+              <label>Jenis barang yang disimpan</label>
+              <select>
+                <option>Fashion / Pakaian</option>
+                <option>Elektronik</option>
+                <option>Makanan / Minuman</option>
+                <option>Skincare / Kosmetik</option>
+                <option>Aksesoris</option>
+                <option>Lainnya</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Catatan untuk pemilik (opsional)</label>
+              <textarea rows="3" placeholder="Misal: butuh akses pickup di hari Sabtu..."></textarea>
+            </div>
+          </div>
+
+          <div class="form-card" style="background: var(--color-primary-tint); border-color: var(--color-primary-mid);">
+            <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+              <div style="width: 36px; height: 36px; flex-shrink: 0; border-radius: 8px; background: white; display: flex; align-items: center; justify-content: center;">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1L9.94 5.93L15 6.62L11.5 10.34L12.39 15.5L8 13.07L3.61 15.5L4.5 10.34L1 6.62L6.06 5.93L8 1Z" fill="#F97316"/></svg>
+              </div>
+              <div>
+                <h6 style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); margin-bottom: 4px;">Pembayaran aman dengan escrow</h6>
+                <p style="font-size: 13px; color: var(--color-gray-700); line-height: 1.6;">Dana kamu ditahan WareHub sampai check-in. Jika ada masalah, kami akan kembalikan penuh.</p>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:0.5rem;margin-bottom:1.5rem;font-size:12px;color:var(--color-gray-500);text-align:center;">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" style="display:inline;vertical-align:middle;margin-right:4px;"><path d="M7 1.5L2 4V8C2 11 4.5 13 7 13.5C9.5 13 12 11 12 8V4L7 1.5Z" stroke="#15803D" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            Dilindungi asuransi dasar WareHub.
+            <a href="insurance.html" style="color:var(--color-primary);font-weight:600;" target="_blank">Pelajari selengkapnya.</a>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; gap: 1rem; margin-top: 0;">
+            <button class="btn btn-outline" onclick="history.back()">← Kembali</button>
+            <button class="btn btn-primary btn-lg" onclick="goPay()">Lanjut ke Pembayaran →</button>
+          </div>
+        </div>
+
+        <aside>
+          <div class="summary-card" id="summary"></div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-logo">WareHub</div>
+        <p class="footer-desc">Marketplace sewa gudang fleksibel untuk UMKM dan online seller Indonesia. Dibangun di Jakarta, untuk seluruh nusantara.</p>
+      </div>
+      <div class="footer-col">
+        <h6>Platform</h6>
+        <ul>
+          <li><a href="search.html">Cari Gudang</a></li>
+          <li><a href="register.html?role=owner">Daftarkan Gudang</a></li>
+          <li><a href="dashboard-tenant.html">Dashboard</a></li>
+          <li><a href="messages.html">Pesan</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h6>Perusahaan</h6>
+        <ul>
+          <li><a href="#">Tentang Kami</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Karir</a></li>
+          <li><a href="#">Press Kit</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h6>Bantuan</h6>
+        <ul>
+          <li><a href="#">Pusat Bantuan</a></li>
+          <li><a href="insurance.html">Asuransi &amp; Syarat Ketentuan</a></li>
+          <li><a href="#">Kebijakan Privasi</a></li>
+          <li><a href="messages.html">Hubungi Kami</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 WareHub. Hak cipta dilindungi.</p>
+      <p>Dibuat dengan ☕ untuk UMKM Indonesia</p>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    updateNavbar();
+    const user = getCurrentUser();
+    const data = getBookingData() || { warehouseId: 1, days: 30, startDate: todayISO() };
+    const w = warehouses.find(x => x.id === data.warehouseId) || warehouses[0];
+
+    document.getElementById('b-start').value = data.startDate || todayISO();
+    document.getElementById('b-dur').value = String(data.days || 30);
+    if (user) {
+      document.getElementById('b-name').value = user.name;
+      document.getElementById('b-email').value = user.email;
+    }
+
+    function recompute() {
+      const days = parseInt(document.getElementById('b-dur').value);
+      const start = document.getElementById('b-start').value || todayISO();
+      const end = new Date(start); end.setDate(end.getDate() + days);
+      document.getElementById('b-end').value = end.toISOString().split('T')[0];
+
+      const { subtotal, fee, total } = calcBookingPrice(w.price, days);
+      document.getElementById('summary').innerHTML = `
+        <div class="summary-img">
+          <img src="${w.image}" alt="" />
+          <span class="badge badge-success" style="position: absolute; top: 12px; left: 12px;"><span class="dot dot-success"></span>Tersedia</span>
+        </div>
+        <div class="summary-body">
+          <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); font-size: 1.0625rem; margin-bottom: 4px;">${w.name}</div>
+          <div style="font-size: 13px; color: var(--color-gray-500); display: flex; align-items: center; gap: 4px; margin-bottom: 1rem;">
+            <img src="assets/icons/location.svg" alt="" style="width: 12px; height: 12px;" />${w.location}
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1.25rem;">
+            <div style="padding: 0.6rem; background: var(--color-gray-50); border-radius: 8px;">
+              <div style="font-size: 10px; font-family: var(--font-mono); color: var(--color-gray-500); letter-spacing: 0.06em;">UKURAN</div>
+              <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); font-size: 14px; margin-top: 2px;">${w.size} m²</div>
+            </div>
+            <div style="padding: 0.6rem; background: var(--color-gray-50); border-radius: 8px;">
+              <div style="font-size: 10px; font-family: var(--font-mono); color: var(--color-gray-500); letter-spacing: 0.06em;">RATING</div>
+              <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); font-size: 14px; margin-top: 2px;">★ ${w.rating}</div>
+            </div>
+          </div>
+          <div class="pricing-row"><span style="color: var(--color-gray-600);">${formatRupiah(w.price)} × ${days} hari</span><span style="color: var(--color-ink-900); font-weight: 600;">${formatRupiah(subtotal)}</span></div>
+          <div class="pricing-row"><span style="color: var(--color-gray-600);">Biaya layanan (5%)</span><span style="color: var(--color-ink-900); font-weight: 600;">${formatRupiah(fee)}</span></div>
+          <div class="pricing-row total"><span>Total</span><span>${formatRupiah(total)}</span></div>
+          <div style="margin-top: 1rem; padding: 0.75rem; background: var(--color-gray-50); border-radius: 8px; font-size: 12px; color: var(--color-gray-600); display: flex; gap: 0.5rem; align-items: center;">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/><path d="M7 4V7L9 8.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            Konfirmasi pemilik &lt; 30 menit
+          </div>
+        </div>`;
+    }
+
+    document.getElementById('b-dur').addEventListener('change', recompute);
+    document.getElementById('b-start').addEventListener('change', recompute);
+    recompute();
+
+    function goPay() {
+      const days = parseInt(document.getElementById('b-dur').value);
+      const start = document.getElementById('b-start').value;
+      saveBookingData({ warehouseId: w.id, days, startDate: start, name: document.getElementById('b-name').value, email: document.getElementById('b-email').value });
+      window.location.href = 'payment.html';
+    }
+  </script>
+</body>
+</html>

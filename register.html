@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daftar — WareHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <link rel="stylesheet" href="assets/css/navbar.css" />
+  <link rel="stylesheet" href="assets/css/components.css" />
+  <style>
+    body { background: var(--color-bg); }
+    .auth-shell { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; }
+    .auth-side { background: var(--color-ink-900); color: white; padding: 3rem; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
+    .auth-side::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.04) 1px,transparent 1px); background-size: 48px 48px; pointer-events: none; }
+    .auth-form { padding: 3rem 4rem; display: flex; flex-direction: column; justify-content: center; max-width: 540px; width: 100%; margin: 0 auto; }
+    .field { margin-bottom: 1rem; }
+    .field label { display: block; font-size: 12px; font-family: var(--font-mono); color: var(--color-gray-600); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+    .field input { width: 100%; padding: 0.85rem 1rem; border: var(--border-subtle); border-radius: var(--radius-md); font-size: 0.95rem; outline: none; }
+    .field input:focus { border-color: var(--color-ink-900); }
+    .role-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem; }
+    .role-tile { padding: 1.1rem 1rem; border: 2px solid var(--color-gray-200); border-radius: var(--radius-lg); cursor: pointer; transition: all 0.15s; background: white; }
+    .role-tile.selected { border-color: var(--color-ink-900); background: var(--color-gray-50); }
+    .role-tile .ico { width: 32px; height: 32px; border-radius: 8px; background: var(--color-gray-100); display: flex; align-items: center; justify-content: center; margin-bottom: 0.5rem; }
+    .role-tile.selected .ico { background: var(--color-primary-light); }
+    .role-tile h6 { font-family: var(--font-display); font-weight: 700; font-size: 0.95rem; color: var(--color-ink-900); margin-bottom: 2px; }
+    .role-tile p { font-size: 12px; color: var(--color-gray-500); line-height: 1.5; }
+    .benefit { display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 1rem; position: relative; z-index: 1; }
+    .benefit .check { flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; background: var(--color-primary); display: flex; align-items: center; justify-content: center; }
+    .benefit p { color: rgba(255,255,255,0.85); font-size: 14px; line-height: 1.5; }
+    .benefit p strong { color: white; }
+  </style>
+</head>
+<body>
+  <div class="auth-shell">
+
+    <div class="auth-side">
+      <div style="position: relative; z-index: 1;">
+        <a href="index.html" style="font-family: var(--font-display); font-weight: 800; font-size: 1.5rem; letter-spacing: -0.02em; color: white;">WareHub</a>
+      </div>
+
+      <div style="position: relative; z-index: 1;">
+        <div class="eyebrow" style="margin-bottom: 1.5rem; color: rgba(255,255,255,0.6);"><span style="background: rgba(255,255,255,0.4);"></span>Daftar gratis</div>
+        <h1 style="font-family: var(--font-display); font-weight: 800; font-size: 2.5rem; line-height: 1.15; letter-spacing: -0.025em; margin-bottom: 2rem;">
+          Mulai perjalanan<br /><em style="color: var(--color-primary); font-style: italic;">tanpa ribet.</em>
+        </h1>
+
+        <div class="benefit">
+          <div class="check"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <p><strong>Gratis selamanya.</strong> Tidak ada biaya pendaftaran atau langganan bulanan.</p>
+        </div>
+        <div class="benefit">
+          <div class="check"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <p><strong>Verifikasi cepat.</strong> Akun aktif dalam &lt; 5 menit, mulai sewa atau listing langsung hari ini.</p>
+        </div>
+        <div class="benefit">
+          <div class="check"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <p><strong>Dukungan 24/7.</strong> Tim WareHub siap bantu via WhatsApp dan email.</p>
+        </div>
+      </div>
+
+      <div style="position: relative; z-index: 1; font-family: var(--font-mono); font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 0.08em;">
+        BERGABUNG DENGAN 8.500+ UMKM INDONESIA
+      </div>
+    </div>
+
+    <div class="auth-form">
+      <div class="eyebrow" style="margin-bottom: 1.25rem;">Buat akun baru</div>
+      <h1 style="font-size: 2rem; color: var(--color-ink-900); margin-bottom: 0.5rem; letter-spacing: -0.02em;">Daftar di WareHub</h1>
+      <p style="color: var(--color-gray-500); margin-bottom: 2rem;">Sudah punya akun? <a href="login.html" style="color: var(--color-primary); font-weight: 600;">Masuk</a></p>
+
+      <form id="reg-form" onsubmit="doRegister(event)">
+        <label style="display: block; font-size: 12px; font-family: var(--font-mono); color: var(--color-gray-600); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px;">Saya ingin mendaftar sebagai</label>
+        <div class="role-picker">
+          <div class="role-tile selected" data-role="tenant" onclick="pickRole('tenant')">
+            <div class="ico"><img src="assets/icons/box.svg" alt="" style="width: 18px; height: 18px;" /></div>
+            <h6>Penyewa</h6>
+            <p>Cari dan sewa gudang untuk simpan barang.</p>
+          </div>
+          <div class="role-tile" data-role="owner" onclick="pickRole('owner')">
+            <div class="ico"><img src="assets/icons/warehouse.svg" alt="" style="width: 18px; height: 18px;" /></div>
+            <h6>Pemilik</h6>
+            <p>Daftarkan gudangmu, terima penyewa.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Nama lengkap</label>
+          <input id="name" type="text" placeholder="Misal: Budi Santoso" required />
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input id="email" type="email" placeholder="kamu@example.com" required />
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input id="password" type="password" placeholder="Minimal 6 karakter" minlength="6" required />
+        </div>
+
+        <label style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 13px; color: var(--color-gray-600); margin: 1rem 0 1.5rem; line-height: 1.5;">
+          <input type="checkbox" style="accent-color: var(--color-primary); margin-top: 3px;" required />
+          <span>Saya setuju dengan <a href="#" style="color: var(--color-primary);">Syarat &amp; Ketentuan</a> dan <a href="#" style="color: var(--color-primary);">Kebijakan Privasi</a> WareHub.</span>
+        </label>
+
+        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; justify-content: center;">Buat akun</button>
+
+        <div id="err" style="display: none; margin-top: 1rem; padding: 0.75rem 1rem; background: var(--color-danger-light); border: 1px solid var(--color-danger); color: var(--color-danger); border-radius: var(--radius-md); font-size: 13px;"></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    redirectIfLoggedIn();
+    let role = new URLSearchParams(location.search).get('role') || 'tenant';
+    pickRole(role);
+
+    function pickRole(r) {
+      role = r;
+      document.querySelectorAll('.role-tile').forEach(t => {
+        t.classList.toggle('selected', t.dataset.role === r);
+      });
+    }
+
+    function doRegister(e) {
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const pw = document.getElementById('password').value;
+      const result = register(name, email, pw, role);
+      const errBox = document.getElementById('err');
+
+      if (result.success) {
+        saveSession(result.user);
+        showToast('Akun berhasil dibuat!');
+        setTimeout(() => {
+          window.location.href = role === 'tenant' ? 'dashboard-tenant.html' : 'dashboard-owner.html';
+        }, 600);
+      } else {
+        errBox.textContent = result.message;
+        errBox.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>

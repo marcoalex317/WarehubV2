@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pesan — WareHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <link rel="stylesheet" href="assets/css/navbar.css" />
+  <link rel="stylesheet" href="assets/css/components.css" />
+  <style>
+    body { background: var(--color-bg); }
+
+    .msg-layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      height: calc(100vh - var(--navbar-height));
+      overflow: hidden;
+    }
+
+    /* LEFT — contact list */
+    .contact-panel {
+      border-right: var(--border-subtle);
+      background: var(--color-white);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .contact-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .contact-header h5 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--color-ink-900);
+      font-size: 1.0625rem;
+      letter-spacing: -0.01em;
+    }
+    .contact-list { overflow-y: auto; flex: 1; }
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 1px solid var(--color-gray-100);
+      transition: background 0.12s;
+    }
+    .contact-item:hover { background: var(--color-gray-50); }
+    .contact-item.active { background: var(--color-primary-tint); border-left: 3px solid var(--color-primary); }
+    .contact-avatar {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: var(--color-ink-900); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-weight: 700; font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .contact-info { flex: 1; min-width: 0; }
+    .contact-name { font-weight: 600; color: var(--color-ink-900); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .contact-sub { font-size: 12px; color: var(--color-gray-500); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    .contact-time { font-size: 10px; font-family: var(--font-mono); color: var(--color-gray-400); flex-shrink: 0; }
+    .unread-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-primary); flex-shrink: 0; }
+
+    /* RIGHT — chat window */
+    .chat-panel {
+      display: flex;
+      flex-direction: column;
+      background: var(--color-bg);
+      overflow: hidden;
+    }
+    .chat-header {
+      padding: 1rem 1.5rem;
+      border-bottom: var(--border-subtle);
+      background: var(--color-white);
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      flex-shrink: 0;
+    }
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.875rem;
+    }
+    .msg-bubble {
+      max-width: 65%;
+      padding: 0.625rem 0.875rem;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.55;
+      word-break: break-word;
+    }
+    .msg-bubble.me {
+      background: var(--color-ink-900);
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+    .msg-bubble.other {
+      background: var(--color-white);
+      color: var(--color-ink-900);
+      align-self: flex-start;
+      border: var(--border-subtle);
+      border-bottom-left-radius: 4px;
+    }
+    .msg-row { display: flex; flex-direction: column; }
+    .msg-row.me { align-items: flex-end; }
+    .msg-row.other { align-items: flex-start; }
+    .msg-time { font-size: 10px; font-family: var(--font-mono); color: var(--color-gray-400); margin-top: 3px; }
+    .msg-sender-name { font-size: 11px; color: var(--color-gray-500); font-weight: 600; margin-bottom: 3px; }
+    .chat-input-area {
+      padding: 1rem 1.5rem;
+      border-top: var(--border-subtle);
+      background: var(--color-white);
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-end;
+      flex-shrink: 0;
+    }
+    .chat-input {
+      flex: 1;
+      padding: 0.65rem 1rem;
+      border: var(--border-subtle);
+      border-radius: var(--radius-lg);
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      resize: none;
+      max-height: 120px;
+      min-height: 42px;
+      overflow-y: auto;
+      line-height: 1.5;
+    }
+    .chat-input:focus { border-color: var(--color-ink-900); }
+
+    /* Empty state */
+    .chat-empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-gray-400);
+      gap: 1rem;
+      padding: 3rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-logo"><img src="assets/images/logo.png" alt="WareHub" /></a>
+      <div class="navbar-links">
+        <a href="index.html" class="nav-link">Beranda</a>
+        <a href="index.html#fitur" class="nav-link">Fitur</a>
+        <a href="index.html#cara-kerja" class="nav-link">Cara Kerja</a>
+        <a href="search.html" class="nav-link">Cari Gudang</a>
+        <a href="dashboard-tenant.html" class="nav-link" id="nav-tenant" style="display:none;">Dashboard</a>
+        <a href="dashboard-owner.html" class="nav-link" id="nav-owner" style="display:none;">Dashboard</a>
+      </div>
+      <div class="navbar-right"></div>
+    </div>
+  </nav>
+
+  <div class="msg-layout">
+
+    <!-- PANEL KIRI: Daftar Percakapan -->
+    <div class="contact-panel">
+      <div class="contact-header">
+        <h5>Pesan</h5>
+        <div style="font-size:11px;font-family:var(--font-mono);color:var(--color-gray-500);letter-spacing:0.06em;" id="unread-badge"></div>
+      </div>
+      <div class="contact-list" id="contact-list"></div>
+    </div>
+
+    <!-- PANEL KANAN: Jendela Chat -->
+    <div class="chat-panel" id="chat-panel">
+      <div class="chat-empty" id="chat-empty">
+        <div style="width:64px;height:64px;border-radius:50%;background:var(--color-gray-100);display:flex;align-items:center;justify-content:center;">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M24 4H4C2.9 4 2 4.9 2 6V20C2 21.1 2.9 22 4 22H9V26L14.5 22H24C25.1 22 26 21.1 26 20V6C26 4.9 25.1 4 24 4Z" stroke="var(--color-gray-400)" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:1.125rem;margin-bottom:0.25rem;">Mulai percakapan</div>
+          <div style="font-size:13px;">Pilih percakapan di sebelah kiri untuk membuka chat.</div>
+        </div>
+      </div>
+
+      <div id="chat-active" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+        <div class="chat-header" id="chat-header"></div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-area">
+          <textarea id="chat-input" class="chat-input" placeholder="Tulis pesan…" rows="1"
+            onkeydown="handleEnter(event)" oninput="autoResize(this)"></textarea>
+          <button class="btn btn-primary" onclick="sendMessage()" style="padding:0.6rem 1rem;flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M14 8L2 2L5 8L2 14L14 8Z" fill="currentColor"/>
+            </svg>
+            Kirim
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    updateNavbar();
+    const user = getCurrentUser();
+    const myName = user ? user.name : 'Saya';
+    const myRole = user ? user.role : 'tenant';
+
+    // === Definisi percakapan dummy ===
+    const allConvs = [
+      {
+        id: 'conv_warehub_support',
+        contactName: 'WareHub Support',
+        contactRole: 'Tim Dukungan Resmi WareHub',
+        contactInitial: 'W',
+        avatarColor: '#F97316',
+        lastTime: '08:00',
+        unread: false,
+        isSupport: true,
+        defaultMessages: [
+          { sender: 'other', text: 'Halo! Selamat datang di WareHub Support. Ada yang bisa kami bantu hari ini? 😊', time: '08:00' },
+          { sender: 'other', text: 'Kami siap membantu pertanyaan seputar booking, asuransi, klaim, atau hal lainnya. Silakan sampaikan kendala Anda.', time: '08:01' }
+        ]
+      },
+      {
+        id: 'conv_budi_cawang',
+        contactName: 'Budi Santoso',
+        contactRole: 'Pemilik Gudang Cawang',
+        contactInitial: 'B',
+        avatarColor: '#0B1220',
+        lastTime: '09:35',
+        unread: true,
+        defaultMessages: [
+          { sender: 'other', text: 'Halo, gudang siap digunakan mulai tanggal booking Anda. Ada yang bisa dibantu?', time: '09:15' },
+          { sender: 'me',    text: 'Terima kasih Pak Budi! Saya rencanakan check-in hari Senin pagi sekitar jam 9.', time: '09:32' },
+          { sender: 'other', text: 'Siap! Kami akan siapkan akses untuk Anda. Jangan lupa bawa fotokopi KTP ya untuk administrasi.', time: '09:35' }
+        ]
+      },
+      {
+        id: 'conv_arth_kemang',
+        contactName: 'ARTH Wear',
+        contactRole: 'Penyewa — Ruang Kemang',
+        contactInitial: 'A',
+        avatarColor: '#F97316',
+        lastTime: '11:25',
+        unread: false,
+        defaultMessages: [
+          { sender: 'me',    text: 'Halo ARTH Wear, ruang sudah siap. Kode akses dikirim saat check-in.', time: '11:00' },
+          { sender: 'other', text: 'Terima kasih! Kami datang hari Rabu jam 10. Ada parkir untuk pickup truck?', time: '11:20' },
+          { sender: 'me',    text: 'Ada, halaman belakang muat 2 truk ukuran sedang.', time: '11:25' }
+        ]
+      },
+      {
+        id: 'conv_skincare_sunter',
+        contactName: 'Toko Skincare',
+        contactRole: 'Penyewa — Cold Storage Sunter',
+        contactInitial: 'S',
+        avatarColor: '#1D4ED8',
+        lastTime: 'Kemarin',
+        unread: false,
+        defaultMessages: [
+          { sender: 'other', text: 'Selamat siang, apakah cold storage masih tersedia untuk bulan depan?', time: '13:10' },
+          { sender: 'me',    text: 'Masih tersedia! Silakan booking lewat platform ya, nanti saya konfirmasi segera.', time: '13:45' }
+        ]
+      }
+    ];
+
+    // Support selalu tampil; owner lihat semua; tenant hanya lihat owner + support
+    const convs = myRole === 'tenant'
+      ? allConvs.filter(c => c.isSupport || c.id === 'conv_budi_cawang')
+      : allConvs;
+
+    let activeConvId = null;
+
+    function getStorageKey(convId) {
+      return 'wh_chat_' + convId;
+    }
+
+    function loadMessages(convId) {
+      const raw = localStorage.getItem(getStorageKey(convId));
+      if (raw) return JSON.parse(raw);
+      // Cari di allConvs agar support conv bisa ditemukan
+      const conv = allConvs.find(c => c.id === convId);
+      const msgs = conv ? conv.defaultMessages : [];
+      saveMessages(convId, msgs);
+      return msgs;
+    }
+
+    function saveMessages(convId, msgs) {
+      localStorage.setItem(getStorageKey(convId), JSON.stringify(msgs));
+    }
+
+    function getNow() {
+      const d = new Date();
+      return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+    }
+
+    function renderContacts() {
+      const list = document.getElementById('contact-list');
+      list.innerHTML = convs.map(c => {
+        const msgs = loadMessages(c.id);
+        const last = msgs.length ? msgs[msgs.length - 1] : null;
+        const preview = last ? last.text : '';
+        const isActive = c.id === activeConvId;
+        return `
+          <div class="contact-item ${isActive ? 'active' : ''}" onclick="openConv('${c.id}')">
+            <div class="contact-avatar" style="background:${c.avatarColor};">${c.contactInitial}</div>
+            <div class="contact-info">
+              <div class="contact-name">${c.contactName}</div>
+              <div class="contact-sub">${preview.length > 36 ? preview.slice(0,36)+'…' : preview}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
+              <div class="contact-time">${c.lastTime}</div>
+              ${c.unread ? '<div class="unread-dot"></div>' : '<div style="width:8px;"></div>'}
+            </div>
+          </div>`;
+      }).join('');
+
+      const unreadCount = convs.filter(c => c.unread).length;
+      document.getElementById('unread-badge').textContent = unreadCount ? unreadCount + ' baru' : '';
+    }
+
+    function renderMessages(convId) {
+      const msgs = loadMessages(convId);
+      const conv = convs.find(c => c.id === convId);
+      const box = document.getElementById('chat-messages');
+      box.innerHTML = msgs.map(m => {
+        const isMine = m.sender === 'me';
+        const senderLabel = isMine ? myName : conv.contactName;
+        return `
+          <div class="msg-row ${m.sender}">
+            ${!isMine ? `<div class="msg-sender-name">${senderLabel}</div>` : ''}
+            <div class="msg-bubble ${m.sender}">${escapeHtml(m.text)}</div>
+            <div class="msg-time">${m.time}</div>
+          </div>`;
+      }).join('');
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function escapeHtml(t) {
+      return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function openConv(convId) {
+      activeConvId = convId;
+      const conv = allConvs.find(c => c.id === convId);
+      conv.unread = false;
+
+      document.getElementById('chat-empty').style.display = 'none';
+      const activeEl = document.getElementById('chat-active');
+      activeEl.style.display = 'flex';
+
+      document.getElementById('chat-header').innerHTML = `
+        <div class="contact-avatar" style="background:${conv.avatarColor};width:38px;height:38px;font-size:0.9rem;">${conv.contactInitial}</div>
+        <div style="flex:1;">
+          <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:15px;">${conv.contactName}</div>
+          <div style="font-size:12px;color:var(--color-gray-500);margin-top:1px;">${conv.contactRole}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <span class="dot dot-success"></span>
+          <span style="font-size:12px;color:var(--color-success);">Online</span>
+        </div>
+      `;
+
+      renderMessages(convId);
+      renderContacts();
+      document.getElementById('chat-input').focus();
+    }
+
+    function sendMessage() {
+      if (!activeConvId) return;
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const msgs = loadMessages(activeConvId);
+      msgs.push({ sender: 'me', text, time: getNow() });
+      saveMessages(activeConvId, msgs);
+
+      const conv = allConvs.find(c => c.id === activeConvId);
+      conv.lastTime = getNow();
+
+      input.value = '';
+      input.style.height = 'auto';
+      renderMessages(activeConvId);
+      renderContacts();
+
+      // Simulasi balasan otomatis setelah 1–2 detik
+      setTimeout(() => autoReply(activeConvId), 1200 + Math.random() * 800);
+    }
+
+    function autoReply(convId) {
+      if (convId !== activeConvId) return;
+      const conv = allConvs.find(c => c.id === convId);
+      const supportReplies = [
+        'Terima kasih sudah menghubungi WareHub Support! Kami akan segera menindaklanjuti.',
+        'Pesan Anda sudah kami terima. Tim kami akan merespons dalam 1×24 jam kerja.',
+        'Baik, kami catat pertanyaan Anda. Ada hal lain yang bisa kami bantu?',
+        'Noted! Untuk informasi lebih lanjut, silakan kirim detail kendala Anda.',
+        'Terima kasih atas kepercayaan Anda kepada WareHub. Kami proses segera!'
+      ];
+      const generalReplies = [
+        'Baik, saya catat. Terima kasih!',
+        'Siap, akan kami follow up segera.',
+        'Oke, ada yang perlu dibantu lagi?',
+        'Noted! Informasi sudah kami terima.',
+        'Terima kasih sudah menghubungi kami.'
+      ];
+      const pool = conv && conv.isSupport ? supportReplies : generalReplies;
+      const text = pool[Math.floor(Math.random() * pool.length)];
+      const msgs = loadMessages(convId);
+      msgs.push({ sender: 'other', text, time: getNow() });
+      saveMessages(convId, msgs);
+
+      conv.lastTime = getNow();
+      renderMessages(convId);
+      renderContacts();
+    }
+
+    function handleEnter(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    }
+
+    function autoResize(el) {
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+    }
+
+    // Buka percakapan pertama dari URL param jika ada
+    const urlParams = new URLSearchParams(location.search);
+    const openConvId = urlParams.get('conv');
+
+    renderContacts();
+    if (openConvId && convs.some(c => c.id === openConvId)) {
+      openConv(openConvId);
+    } else if (convs.length > 0) {
+      openConv(convs[0].id);
+    }
+  </script>
+
+</body>
+</html>
