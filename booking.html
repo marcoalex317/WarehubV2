@@ -209,17 +209,45 @@
   <script>
     updateNavbar();
     const user = getCurrentUser();
-    const data = getBookingData() || { warehouseId: 1, days: 30, startDate: todayISO() };
-    const w = warehouses.find(x => x.id === data.warehouseId) || warehouses[0];
+    const bookingData = getBookingData() || { warehouseId: 1, days: 30, startDate: todayISO() };
+    let w = null;
 
-    document.getElementById('b-start').value = data.startDate || todayISO();
-    document.getElementById('b-dur').value = String(data.days || 30);
-    if (user) {
-      document.getElementById('b-name').value = user.name;
-      document.getElementById('b-email').value = user.email;
+    async function loadWarehouseForBooking() {
+      try {
+        const res = await fetch(window.location.origin + '/api/warehouses/' + bookingData.warehouseId);
+        const data = await res.json();
+        if (data.success) {
+          w = data.warehouse;
+          w.available = w.available === 1 || w.available === true;
+          w.rating = w.rating || 0;
+          w.reviews = w.reviews || 0;
+          if (w.image && w.image.startsWith('/uploads/')) { /* keep */ }
+          else if (!w.image) w.image = 'assets/images/placeholder-warehouse.svg';
+          initBookingForm();
+        } else {
+          document.getElementById('summary').innerHTML = '<div style="padding:2rem;text-align:center;color:var(--color-gray-500);">Gudang tidak ditemukan.</div>';
+        }
+      } catch (err) {
+        console.error('Gagal memuat data gudang:', err);
+        document.getElementById('summary').innerHTML = '<div style="padding:2rem;text-align:center;color:var(--color-gray-500);">Gagal memuat data.</div>';
+      }
+    }
+
+    function initBookingForm() {
+      document.getElementById('b-start').value = bookingData.startDate || todayISO();
+      document.getElementById('b-dur').value = String(bookingData.days || 30);
+      if (user) {
+        document.getElementById('b-name').value = user.name;
+        document.getElementById('b-email').value = user.email;
+      }
+
+      document.getElementById('b-dur').addEventListener('change', recompute);
+      document.getElementById('b-start').addEventListener('change', recompute);
+      recompute();
     }
 
     function recompute() {
+      if (!w) return;
       const days = parseInt(document.getElementById('b-dur').value);
       const start = document.getElementById('b-start').value || todayISO();
       const end = new Date(start); end.setDate(end.getDate() + days);
@@ -256,16 +284,43 @@
         </div>`;
     }
 
-    document.getElementById('b-dur').addEventListener('change', recompute);
-    document.getElementById('b-start').addEventListener('change', recompute);
-    recompute();
-
-    function goPay() {
+    async function goPay() {
+      if (!w) return;
       const days = parseInt(document.getElementById('b-dur').value);
       const start = document.getElementById('b-start').value;
-      saveBookingData({ warehouseId: w.id, days, startDate: start, name: document.getElementById('b-name').value, email: document.getElementById('b-email').value });
-      window.location.href = 'payment.html';
+      const token = getToken();
+
+      if (!token) {
+        showToast('Silakan login terlebih dahulu sebagai penyewa.');
+        setTimeout(() => { window.location.href = 'login.html'; }, 1000);
+        return;
+      }
+
+      try {
+        const res = await fetch(window.location.origin + '/api/bookings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ warehouse_id: w.id, start_date: start, days })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          clearBookingData();
+          showToast('Booking berhasil dibuat! Status: Menunggu konfirmasi.');
+          setTimeout(() => { window.location.href = 'dashboard-tenant.html'; }, 1500);
+        } else {
+          showToast(data.message || 'Gagal membuat booking.');
+        }
+      } catch (err) {
+        console.error('Booking error:', err);
+        showToast('Terjadi kesalahan saat membuat booking.');
+      }
     }
+
+    loadWarehouseForBooking();
   </script>
 </body>
 </html>

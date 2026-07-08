@@ -2,7 +2,7 @@
 // DATA DUMMY WAREHUB
 // =====================
 
-const warehouses = [
+var warehouses = [
   {
     id: 1,
     name: "Gudang Premium Cawang",

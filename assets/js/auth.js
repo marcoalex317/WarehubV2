@@ -1,31 +1,18 @@
 // =====================
 // WAREHUB AUTH SYSTEM
+// Versi Backend — semua auth lewat API server
 // =====================
 
-// Demo accounts yang bisa dipakai login
-const demoAccounts = [
-  {
-    id: 1,
-    name: "ARTH Wear",
-    email: "tenant@warehub.com",
-    password: "tenant123",
-    role: "tenant"
-  },
-  {
-    id: 2,
-    name: "Budi Santoso",
-    email: "owner@warehub.com",
-    password: "owner123",
-    role: "owner"
-  }
-];
+const API_BASE = window.location.origin + '/api';
 
 // =====================
 // SESSION MANAGEMENT
+// Token JWT & data user disimpan di localStorage
 // =====================
 
-function saveSession(user) {
+function saveSession(user, token) {
   localStorage.setItem("wh_user", JSON.stringify(user));
+  if (token) localStorage.setItem("wh_token", token);
 }
 
 function getSession() {
@@ -33,12 +20,17 @@ function getSession() {
   return data ? JSON.parse(data) : null;
 }
 
+function getToken() {
+  return localStorage.getItem("wh_token");
+}
+
 function clearSession() {
   localStorage.removeItem("wh_user");
+  localStorage.removeItem("wh_token");
 }
 
 function isLoggedIn() {
-  return getSession() !== null;
+  return getSession() !== null && getToken() !== null;
 }
 
 function getCurrentUser() {
@@ -50,70 +42,54 @@ function getCurrentRole() {
   return user ? user.role : null;
 }
 
-// =====================
-// LOGIN
-// =====================
-
-function login(email, password) {
-  // Cek demo accounts dulu
-  const found = demoAccounts.find(
-    a => a.email === email && a.password === password
-  );
-  if (found) {
-    saveSession(found);
-    return { success: true, user: found };
-  }
-
-  // Cek registered accounts dari localStorage
-  const registered = getRegisteredUsers();
-  const registeredUser = registered.find(
-    u => u.email === email && u.password === password
-  );
-  if (registeredUser) {
-    saveSession(registeredUser);
-    return { success: true, user: registeredUser };
-  }
-
-  return { success: false, message: "Email atau password salah." };
+// Helper untuk kirim request ke API dengan token
+function apiFetch(endpoint, options = {}) {
+  const token = getToken();
+  const headers = { 'Content-Type': 'application/json', ...options.headers };
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  return fetch(API_BASE + endpoint, { ...options, headers });
 }
 
 // =====================
-// REGISTER
+// LOGIN (async — panggil backend)
 // =====================
 
-function getRegisteredUsers() {
-  const data = localStorage.getItem("wh_registered");
-  return data ? JSON.parse(data) : [];
-}
+async function login(email, password) {
+  try {
+    const res = await apiFetch('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
 
-function saveRegisteredUsers(users) {
-  localStorage.setItem("wh_registered", JSON.stringify(users));
-}
-
-function register(name, email, password, role) {
-  // Validasi tidak boleh pakai email demo
-  const allEmails = [
-    ...demoAccounts.map(a => a.email),
-    ...getRegisteredUsers().map(u => u.email)
-  ];
-
-  if (allEmails.includes(email)) {
-    return { success: false, message: "Email sudah terdaftar." };
+    if (data.success) {
+      saveSession(data.user, data.token);
+    }
+    return data;
+  } catch (err) {
+    return { success: false, message: 'Tidak bisa terhubung ke server.' };
   }
+}
 
-  const newUser = {
-    id: Date.now(),
-    name,
-    email,
-    password,
-    role
-  };
+// =====================
+// REGISTER (async — panggil backend)
+// =====================
 
-  const users = getRegisteredUsers();
-  users.push(newUser);
-  saveRegisteredUsers(users);
+async function register(name, email, password, role) {
+  try {
+    const res = await apiFetch('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, password, role })
+    });
+    const data = await res.json();
 
-  return { success: true, user: newUser };
+    if (data.success) {
+      saveSession(data.user, data.token);
+    }
+    return data;
+  } catch (err) {
+    return { success: false, message: 'Tidak bisa terhubung ke server.' };
+  }
 }
 
 // =====================
@@ -129,7 +105,6 @@ function logout() {
 // ROUTE PROTECTION
 // =====================
 
-// Halaman yang butuh login
 function requireLogin(redirectTo = "login.html") {
   if (!isLoggedIn()) {
     window.location.href = redirectTo;
@@ -138,7 +113,6 @@ function requireLogin(redirectTo = "login.html") {
   return true;
 }
 
-// Halaman yang butuh role tertentu
 function requireRole(role, redirectTo = "index.html") {
   const user = getCurrentUser();
   if (!user || user.role !== role) {
@@ -148,7 +122,6 @@ function requireRole(role, redirectTo = "index.html") {
   return true;
 }
 
-// Redirect kalau sudah login (untuk halaman login/register)
 function redirectIfLoggedIn() {
   const user = getCurrentUser();
   if (user) {
@@ -168,7 +141,6 @@ function updateNavbar() {
   const user = getCurrentUser();
   const navRight = document.querySelector(".navbar-right");
 
-  // Tampilkan/sembunyikan link dashboard sesuai role
   const navTenant = document.getElementById("nav-tenant");
   const navOwner  = document.getElementById("nav-owner");
   const navMsgs   = document.getElementById("nav-messages");
@@ -223,7 +195,7 @@ function updateNavbar() {
 }
 
 // =====================
-// BOOKING SESSION
+// BOOKING SESSION (tetap localStorage untuk sementara)
 // =====================
 
 function saveBookingData(data) {

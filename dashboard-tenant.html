@@ -388,26 +388,50 @@
       document.querySelectorAll('.tab-content').forEach(t => t.classList.toggle('hidden', t.id !== id));
     }
 
-    // ── Bookings ──
-    const allBookings = [...bookings, ...getActiveBookings()];
-    const bookingHTML = allBookings.map(b => {
-      const w = warehouses.find(x => x.id === (b.warehouseId || 1)) || warehouses[0];
-      const status = b.status === 'active'
-        ? `<span class="badge badge-success"><span class="dot dot-success"></span>Aktif</span>`
-        : `<span class="badge" style="background:var(--color-warning-light);color:var(--color-warning);"><span class="dot" style="background:var(--color-warning);"></span>Menunggu</span>`;
-      return `
-        <div class="booking-row">
-          <img src="${w.image}" alt="" />
-          <div>
-            <div class="row-name">${b.warehouseName || w.name}</div>
-            <div class="row-sub"><img src="assets/icons/location.svg" alt="" style="width:11px;height:11px;" />${b.location || w.location} · ${b.size || (w.size + ' m²')} · ${b.period || (b.days + ' hari')}</div>
-          </div>
-          <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);">${formatRupiah(b.total)}</div>
-          ${status}
-        </div>`;
-    }).join('');
-    document.getElementById('active-bookings').innerHTML = bookingHTML;
-    document.getElementById('full-bookings').innerHTML = bookingHTML;
+    // ── Bookings (dari API) ──
+    async function loadMyBookings() {
+      const token = getToken();
+      if (!token) return;
+      try {
+        const res = await fetch(window.location.origin + '/api/bookings/my', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        if (!data.success) return;
+
+        if (data.bookings.length === 0) {
+          const emptyHTML = '<div style="text-align:center;padding:2rem;color:var(--color-gray-500);font-size:14px;">Belum ada booking. <a href="search.html" style="color:var(--color-primary);font-weight:600;">Cari gudang sekarang →</a></div>';
+          document.getElementById('active-bookings').innerHTML = emptyHTML;
+          document.getElementById('full-bookings').innerHTML = emptyHTML;
+          return;
+        }
+
+        const bookingHTML = data.bookings.map(b => {
+          const imgSrc = b.warehouse_image && b.warehouse_image.startsWith('/uploads/') ? b.warehouse_image : 'assets/images/placeholder-warehouse.svg';
+          const statusMap = {
+            active: '<span class="badge badge-success"><span class="dot dot-success"></span>Aktif</span>',
+            pending: '<span class="badge" style="background:var(--color-warning-light);color:var(--color-warning);"><span class="dot" style="background:var(--color-warning);"></span>Menunggu</span>',
+            done: '<span class="badge badge-gray">Selesai</span>',
+            cancelled: '<span class="badge" style="background:var(--color-danger-light);color:var(--color-danger);">Dibatalkan</span>'
+          };
+          return `
+            <div class="booking-row">
+              <img src="${imgSrc}" alt="" />
+              <div>
+                <div class="row-name">${b.warehouse_name}</div>
+                <div class="row-sub"><img src="assets/icons/location.svg" alt="" style="width:11px;height:11px;" />${b.warehouse_location} · ${b.days} hari · ${b.start_date}</div>
+              </div>
+              <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);">${formatRupiah(b.total_price)}</div>
+              ${statusMap[b.status] || statusMap.pending}
+            </div>`;
+        }).join('');
+        document.getElementById('active-bookings').innerHTML = bookingHTML;
+        document.getElementById('full-bookings').innerHTML = bookingHTML;
+      } catch (err) {
+        console.error('Gagal memuat booking:', err);
+      }
+    }
+    loadMyBookings();
 
     // ── Inventory ──
     const inventoryHTML = inventory.map(i => {

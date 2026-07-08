@@ -118,7 +118,7 @@
               <h4 id="welcome" style="font-family: var(--font-display); font-weight: 800; font-size: 2rem; color: var(--color-ink-900); letter-spacing: -0.025em;">Halo!</h4>
               <p>Ringkasan performa gudangmu di bulan Mei 2026.</p>
             </div>
-            <button class="btn btn-primary">+ Tambah gudang</button>
+            <button class="btn btn-primary" onclick="openAddModal()">+ Tambah gudang</button>
           </div>
 
           <div class="grid grid-4 gap-4" style="margin-bottom: 2rem;">
@@ -197,7 +197,7 @@
               <h4 style="font-family:var(--font-display);font-weight:800;font-size:2rem;color:var(--color-ink-900);letter-spacing:-0.025em;">Gudang saya</h4>
               <p>Kelola listing, harga, dan ketersediaan.</p>
             </div>
-            <button class="btn btn-primary">+ Tambah gudang</button>
+            <button class="btn btn-primary" onclick="openAddModal()">+ Tambah gudang</button>
           </div>
           <div class="grid grid-3 gap-4" id="listings-grid"></div>
         </div>
@@ -380,6 +380,63 @@
     </div>
   </main>
 
+  <!-- MODAL TAMBAH GUDANG -->
+  <div class="modal-overlay" id="add-warehouse-modal">
+    <div style="background:white;border-radius:var(--radius-xl);max-width:600px;width:100%;padding:2rem;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:var(--border-subtle);">
+        <div>
+          <div style="font-size:10px;font-family:var(--font-mono);color:var(--color-gray-500);letter-spacing:0.08em;margin-bottom:4px;">GUDANG BARU</div>
+          <h2 style="color:var(--color-ink-900);font-family:var(--font-display);font-weight:800;font-size:1.5rem;letter-spacing:-0.02em;">Tambah Gudang</h2>
+        </div>
+        <button class="btn btn-ghost" onclick="closeAddModal()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <form id="add-warehouse-form" onsubmit="submitWarehouse(event)">
+        <div class="pf-field">
+          <label>Nama gudang *</label>
+          <input id="wh-name" type="text" placeholder="Misal: Gudang Premium Cawang" required />
+        </div>
+        <div class="pf-row">
+          <div class="pf-field">
+            <label>Lokasi *</label>
+            <input id="wh-location" type="text" placeholder="Misal: Cawang, Jakarta Timur" required />
+          </div>
+          <div class="pf-field">
+            <label>Alamat lengkap</label>
+            <input id="wh-address" type="text" placeholder="Jl. Cawang Indah No. 12" />
+          </div>
+        </div>
+        <div class="pf-row">
+          <div class="pf-field">
+            <label>Ukuran (m²) *</label>
+            <input id="wh-size" type="number" placeholder="50" min="1" required />
+          </div>
+          <div class="pf-field">
+            <label>Harga per hari (Rp) *</label>
+            <input id="wh-price" type="number" placeholder="85000" min="1000" required />
+          </div>
+        </div>
+        <div class="pf-field">
+          <label>Deskripsi</label>
+          <textarea id="wh-desc" rows="3" placeholder="Deskripsikan gudang kamu..." style="width:100%;padding:0.7rem 0.85rem;border:var(--border-subtle);border-radius:var(--radius-md);font-size:14px;outline:none;font-family:inherit;resize:vertical;"></textarea>
+        </div>
+        <div class="pf-field">
+          <label>Fasilitas (pisahkan dengan koma)</label>
+          <input id="wh-facilities" type="text" placeholder="CCTV, Keamanan 24 Jam, Akses Kendaraan" />
+        </div>
+        <div class="pf-field">
+          <label>Foto gudang</label>
+          <input id="wh-image" type="file" accept=".jpg,.jpeg,.png,.webp" style="width:100%;padding:0.7rem 0.85rem;border:var(--border-subtle);border-radius:var(--radius-md);font-size:14px;background:white;" />
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1rem;">
+          <button type="button" class="btn btn-outline" onclick="closeAddModal()">Batal</button>
+          <button type="submit" class="btn btn-primary" id="wh-submit-btn">Tambah Gudang</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
   <script src="assets/js/data.js"></script>
   <script src="assets/js/auth.js"></script>
@@ -398,83 +455,211 @@
       document.querySelectorAll('.tab-content').forEach(t => t.classList.toggle('hidden', t.id !== id));
     }
 
-    // ── Pending bookings ──
-    const pendingBookings = incomingBookings.filter(b => b.status === 'pending');
-    document.getElementById('pending-list').innerHTML = pendingBookings.map(b => `
-      <div style="padding:0.75rem 0;border-bottom:1px dashed var(--color-gray-200);">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem;">
-          <div>
-            <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:14px;">${b.tenant}</div>
-            <div style="font-size:12px;color:var(--color-gray-500);margin-top:2px;">${b.warehouse} · ${b.size} · ${b.period}</div>
-          </div>
-          <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:14px;">${formatRupiah(b.total)}</div>
-        </div>
-        <div style="display:flex;gap:0.5rem;">
-          <button class="btn btn-primary btn-sm" style="flex:1;justify-content:center;" onclick="showToast('Booking dikonfirmasi!');this.closest('div').parentElement.style.opacity=0.4;">Terima</button>
-          <button class="btn btn-outline btn-sm" style="flex:1;justify-content:center;">Tolak</button>
-        </div>
-      </div>`).join('') || '<p style="color:var(--color-gray-500);font-size:13px;text-align:center;padding:1rem;">Tidak ada permintaan baru.</p>';
+    // ── Pending bookings (dari API) ──
+    async function loadOwnerBookings() {
+      const token = getToken();
+      if (!token) return;
+      try {
+        const res = await fetch(window.location.origin + '/api/bookings/owner', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        if (!data.success) return;
 
-    // ── Listings table (overview) ──
-    document.getElementById('listings-list').innerHTML = ownerListings.map(l => {
-      const statusBadge = l.status === 'active'
-        ? `<span class="badge badge-success"><span class="dot dot-success"></span>Aktif</span>`
-        : `<span class="badge" style="background:var(--color-warning-light);color:var(--color-warning);"><span class="dot" style="background:var(--color-warning);"></span>Pending</span>`;
-      const occCls = l.occupancy >= 80 ? 'success' : l.occupancy >= 50 ? 'warning' : 'danger';
-      return `
-        <div class="listing-row">
-          <div>
-            <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:14px;">${l.name}</div>
-            <div style="font-size:12px;color:var(--color-gray-500);">${l.location}</div>
-          </div>
-          <div style="font-size:13px;color:var(--color-gray-700);">${l.size}</div>
-          <div style="text-align:right;font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);">${formatRupiah(l.price)}</div>
-          <div>
-            <div style="font-size:12px;color:var(--color-gray-700);margin-bottom:2px;">${l.occupancy}%</div>
-            <div class="progress-bar"><div class="progress-fill ${occCls}" style="width:${l.occupancy}%;"></div></div>
-          </div>
-          <div>${statusBadge}</div>
-        </div>`;
-    }).join('');
-
-    // ── Listings grid (full tab) ──
-    document.getElementById('listings-grid').innerHTML = ownerListings.map((l, i) => {
-      const w = warehouses[i] || warehouses[0];
-      const statusBadge = l.status === 'active'
-        ? `<span class="badge badge-success"><span class="dot dot-success"></span>Aktif</span>`
-        : `<span class="badge" style="background:var(--color-warning-light);color:var(--color-warning);">Pending</span>`;
-      return `
-        <div class="card warehouse-card">
-          <div class="warehouse-card-availability">${statusBadge}</div>
-          <img src="${w.image}" alt="" class="warehouse-card-img" />
-          <div class="card-body">
-            <div class="warehouse-card-name">${l.name}</div>
-            <div class="warehouse-card-loc"><img src="assets/icons/location.svg" alt="" />${l.location}</div>
-            <div class="warehouse-card-tags"><span class="badge badge-gray">${l.size}</span><span class="badge badge-gray">Hunian ${l.occupancy}%</span></div>
-            <div class="warehouse-card-bottom">
-              <div class="warehouse-price">${formatRupiah(l.price)}<span> /hari</span></div>
-              <button class="btn btn-outline btn-sm">Edit</button>
+        const pendingBookings = data.bookings.filter(b => b.status === 'pending');
+        document.getElementById('pending-list').innerHTML = pendingBookings.map(b => `
+          <div style="padding:0.75rem 0;border-bottom:1px dashed var(--color-gray-200);">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem;">
+              <div>
+                <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:14px;">${b.tenant_name}</div>
+                <div style="font-size:12px;color:var(--color-gray-500);margin-top:2px;">${b.warehouse_name} · ${b.days} hari · ${b.start_date}</div>
+              </div>
+              <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:14px;">${formatRupiah(b.total_price)}</div>
             </div>
-          </div>
-        </div>`;
-    }).join('');
+            <div style="display:flex;gap:0.5rem;">
+              <button class="btn btn-primary btn-sm" style="flex:1;justify-content:center;" onclick="showToast('Booking dikonfirmasi!');this.closest('div').parentElement.style.opacity=0.4;">Terima</button>
+              <button class="btn btn-outline btn-sm" style="flex:1;justify-content:center;">Tolak</button>
+            </div>
+          </div>`).join('') || '<p style="color:var(--color-gray-500);font-size:13px;text-align:center;padding:1rem;">Tidak ada permintaan baru.</p>';
 
-    // ── Bookings tab ──
-    document.getElementById('full-bookings').innerHTML = incomingBookings.map(b => {
-      const status = b.status === 'pending'
-        ? `<span class="badge" style="background:var(--color-warning-light);color:var(--color-warning);">Pending</span>`
-        : `<span class="badge badge-success">Aktif</span>`;
-      return `
-        <div style="display:grid;grid-template-columns:36px 1fr auto auto;gap:1rem;align-items:center;padding:0.875rem 0;border-bottom:1px dashed var(--color-gray-200);">
-          <div style="width:36px;height:36px;border-radius:50%;background:var(--color-primary-light);color:var(--color-primary);display:flex;align-items:center;justify-content:center;font-weight:700;">${b.tenant.charAt(0)}</div>
-          <div>
-            <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:14px;">${b.tenant}</div>
-            <div style="font-size:12px;color:var(--color-gray-500);">${b.warehouse} · ${b.size} · ${b.period}</div>
-          </div>
-          <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);">${formatRupiah(b.total)}</div>
-          ${status}
-        </div>`;
-    }).join('');
+        document.getElementById('full-bookings').innerHTML = data.bookings.map(b => {
+          const statusMap = {
+            pending: '<span class="badge" style="background:var(--color-warning-light);color:var(--color-warning);">Pending</span>',
+            active: '<span class="badge badge-success">Aktif</span>',
+            done: '<span class="badge badge-gray">Selesai</span>',
+            cancelled: '<span class="badge" style="background:var(--color-danger-light);color:var(--color-danger);">Dibatalkan</span>'
+          };
+          return `
+            <div style="display:grid;grid-template-columns:36px 1fr auto auto;gap:1rem;align-items:center;padding:0.875rem 0;border-bottom:1px dashed var(--color-gray-200);">
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--color-primary-light);color:var(--color-primary);display:flex;align-items:center;justify-content:center;font-weight:700;">${b.tenant_name.charAt(0)}</div>
+              <div>
+                <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:14px;">${b.tenant_name}</div>
+                <div style="font-size:12px;color:var(--color-gray-500);">${b.warehouse_name} · ${b.days} hari · ${b.start_date}</div>
+              </div>
+              <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);">${formatRupiah(b.total_price)}</div>
+              ${statusMap[b.status] || statusMap.pending}
+            </div>`;
+        }).join('') || '<p style="color:var(--color-gray-500);font-size:13px;text-align:center;padding:1rem;">Belum ada booking masuk.</p>';
+      } catch (err) {
+        console.error('Gagal memuat booking owner:', err);
+      }
+    }
+    loadOwnerBookings();
+
+    // ── Load gudang dari API ──
+    let myWarehouses = [];
+
+    async function loadMyWarehouses() {
+      try {
+        const res = await apiFetch('/warehouses/owner/me');
+        const data = await res.json();
+        if (data.success) {
+          myWarehouses = data.warehouses;
+          renderListingsTable();
+          renderListingsGrid();
+        }
+      } catch (err) {
+        console.error('Gagal load gudang:', err);
+      }
+    }
+
+    function getWarehouseImage(w) {
+      if (w.image && w.image.startsWith('/uploads/')) return w.image;
+      if (w.image && w.image !== '') return w.image;
+      return 'assets/images/gudang-1.jpg';
+    }
+
+    function renderListingsTable() {
+      if (myWarehouses.length === 0) {
+        document.getElementById('listings-list').innerHTML = '<div style="text-align:center;padding:2rem;color:var(--color-gray-500);font-size:13px;">Belum ada gudang. Klik "+ Tambah gudang" untuk mulai.</div>';
+        return;
+      }
+      document.getElementById('listings-list').innerHTML = myWarehouses.map(l => {
+        const statusBadge = l.available
+          ? `<span class="badge badge-success"><span class="dot dot-success"></span>Aktif</span>`
+          : `<span class="badge badge-gray">Nonaktif</span>`;
+        return `
+          <div class="listing-row">
+            <div>
+              <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:14px;">${l.name}</div>
+              <div style="font-size:12px;color:var(--color-gray-500);">${l.location}</div>
+            </div>
+            <div style="font-size:13px;color:var(--color-gray-700);">${l.size} m²</div>
+            <div style="text-align:right;font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);">${formatRupiah(l.price)}</div>
+            <div>—</div>
+            <div>${statusBadge}</div>
+          </div>`;
+      }).join('');
+    }
+
+    function renderListingsGrid() {
+      if (myWarehouses.length === 0) {
+        document.getElementById('listings-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:4rem;border:1px dashed var(--color-gray-300);border-radius:var(--radius-lg);color:var(--color-gray-500);"><div style="font-family:var(--font-display);font-size:1.125rem;color:var(--color-ink-900);margin-bottom:0.5rem;">Belum ada gudang</div><p style="font-size:14px;">Klik tombol "+ Tambah gudang" di atas untuk listing gudang pertamamu.</p></div>';
+        return;
+      }
+      document.getElementById('listings-grid').innerHTML = myWarehouses.map(l => {
+        const statusBadge = l.available
+          ? `<span class="badge badge-success"><span class="dot dot-success"></span>Aktif</span>`
+          : `<span class="badge badge-gray">Nonaktif</span>`;
+        const img = getWarehouseImage(l);
+        const facs = Array.isArray(l.facilities) ? l.facilities : [];
+        const tags = facs.slice(0, 2).map(f => `<span class="badge badge-gray">${f}</span>`).join('');
+        return `
+          <div class="card warehouse-card">
+            <div class="warehouse-card-availability">${statusBadge}</div>
+            <img src="${img}" alt="" class="warehouse-card-img" />
+            <div class="card-body">
+              <div class="warehouse-card-name">${l.name}</div>
+              <div class="warehouse-card-loc"><img src="assets/icons/location.svg" alt="" />${l.location}</div>
+              <div class="warehouse-card-tags"><span class="badge badge-gray">${l.size} m²</span>${tags}</div>
+              <div class="warehouse-card-bottom">
+                <div class="warehouse-price">${formatRupiah(l.price)}<span> /hari</span></div>
+                <button class="btn btn-outline btn-sm" onclick="deleteWarehouse(${l.id})">Hapus</button>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // ── Modal Tambah Gudang ──
+    function openAddModal() {
+      document.getElementById('add-warehouse-modal').classList.add('show');
+    }
+    function closeAddModal() {
+      document.getElementById('add-warehouse-modal').classList.remove('show');
+      document.getElementById('add-warehouse-form').reset();
+    }
+
+    async function submitWarehouse(e) {
+      e.preventDefault();
+      const btn = document.getElementById('wh-submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Menyimpan...';
+
+      const formData = new FormData();
+      formData.append('name', document.getElementById('wh-name').value.trim());
+      formData.append('location', document.getElementById('wh-location').value.trim());
+      formData.append('address', document.getElementById('wh-address').value.trim());
+      formData.append('size', document.getElementById('wh-size').value);
+      formData.append('price', document.getElementById('wh-price').value);
+      formData.append('description', document.getElementById('wh-desc').value.trim());
+
+      const facInput = document.getElementById('wh-facilities').value.trim();
+      if (facInput) {
+        const facArray = facInput.split(',').map(f => f.trim()).filter(f => f);
+        formData.append('facilities', JSON.stringify(facArray));
+      }
+
+      const imageFile = document.getElementById('wh-image').files[0];
+      if (imageFile) formData.append('image', imageFile);
+
+      try {
+        const token = getToken();
+        const res = await fetch(API_BASE + '/warehouses', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token },
+          body: formData
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          showToast('Gudang berhasil ditambahkan!');
+          closeAddModal();
+          await loadMyWarehouses();
+        } else {
+          showToast(data.message || 'Gagal menambah gudang.');
+        }
+      } catch (err) {
+        showToast('Tidak bisa terhubung ke server.');
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Tambah Gudang';
+    }
+
+    async function deleteWarehouse(id) {
+      if (!confirm('Yakin ingin hapus gudang ini?')) return;
+      try {
+        const token = getToken();
+        const res = await fetch(API_BASE + '/warehouses/' + id, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Gudang berhasil dihapus.');
+          await loadMyWarehouses();
+        } else {
+          showToast(data.message);
+        }
+      } catch (err) {
+        showToast('Gagal menghapus gudang.');
+      }
+    }
+
+    loadMyWarehouses();
+
+    // ── Bookings tab — sudah diload lewat loadOwnerBookings() di atas ──
 
     // ── Earnings table ──
     document.getElementById('earnings-tbody').innerHTML = earnings.map(e => `

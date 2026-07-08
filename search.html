@@ -204,20 +204,47 @@
 
     let activeQuick = 'all';
     let compareList = [];
+    var warehouses = [];
+
+    async function loadWarehouses() {
+      try {
+        const res = await fetch(window.location.origin + '/api/warehouses');
+        const data = await res.json();
+        if (data.success) {
+          warehouses = data.warehouses.map(w => ({
+            ...w,
+            available: w.available === 1 || w.available === true,
+            facilities: Array.isArray(w.facilities) ? w.facilities : [],
+            rating: w.rating || 0,
+            reviews: w.reviews || 0
+          }));
+        }
+      } catch (err) {
+        console.error('Gagal memuat gudang:', err);
+      }
+      applyFilters();
+    }
+
+    function getWarehouseImage(w) {
+      if (w.image && w.image.startsWith('/uploads/')) return w.image;
+      if (w.image && w.image !== '') return w.image;
+      return 'assets/images/placeholder-warehouse.svg';
+    }
 
     function buildCard(w) {
       const availBadge = w.available
         ? `<span class="badge badge-success"><span class="dot dot-success"></span>Tersedia</span>`
         : `<span class="badge badge-gray">Penuh</span>`;
-      const tags = w.tags.slice(0, 2).map(t => `<span class="badge badge-gray">${t}</span>`).join('');
+      const tags = (w.facilities || []).slice(0, 2).map(t => `<span class="badge badge-gray">${t}</span>`).join('');
       const isSelected = compareList.includes(w.id);
+      const imgSrc = getWarehouseImage(w);
       return `
         <a href="detail.html?id=${w.id}" class="card card-clickable warehouse-card" style="${isSelected ? 'outline:2px solid var(--color-primary);outline-offset:2px;' : ''}">
           <div class="warehouse-card-availability">${availBadge}</div>
           <div class="warehouse-card-fav" onclick="event.preventDefault();event.stopPropagation();">
             <svg viewBox="0 0 18 18" fill="none"><path d="M9 15.5C9 15.5 1.5 11.25 1.5 6.25C1.5 4.04086 3.29086 2.25 5.5 2.25C7.0913 2.25 8.4587 3.18261 9 4.5C9.5413 3.18261 10.9087 2.25 12.5 2.25C14.7091 2.25 16.5 4.04086 16.5 6.25C16.5 11.25 9 15.5 9 15.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
           </div>
-          <img src="${w.image}" alt="${w.name}" class="warehouse-card-img" />
+          <img src="${imgSrc}" alt="${w.name}" class="warehouse-card-img" />
           <div class="card-body">
             <div class="warehouse-card-name">${w.name}</div>
             <div class="warehouse-card-loc"><img src="assets/icons/location.svg" alt="" />${w.location}</div>
@@ -377,7 +404,7 @@
     });
     document.getElementById('q').addEventListener('keydown', e => { if (e.key === 'Enter') applyFilters(); });
 
-    applyFilters();
+    loadWarehouses();
   </script>
 
   <!-- COMPARE BAR -->

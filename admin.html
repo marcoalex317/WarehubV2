@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — WareHub Database</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --font-display: 'Plus Jakarta Sans', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --ink: #0f172a;
+      --gray-50: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-400: #94a3b8;
+      --gray-500: #64748b;
+      --gray-700: #334155;
+      --primary: #f97316;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: var(--font-body); background: var(--gray-50); color: var(--ink); }
+
+    .topbar {
+      background: var(--ink); color: white; padding: 1rem 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .topbar h1 { font-family: var(--font-display); font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; }
+    .topbar .sub { font-family: var(--font-mono); font-size: 11px; color: rgba(255,255,255,0.5); letter-spacing: 0.05em; }
+    .topbar button {
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+      color: white; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;
+      font-family: var(--font-body); font-size: 13px; font-weight: 600;
+      transition: background 0.15s;
+    }
+    .topbar button:hover { background: rgba(255,255,255,0.2); }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card {
+      background: white; border: 1px solid var(--gray-200); border-radius: 12px; padding: 1.25rem;
+    }
+    .stat-card .label { font-family: var(--font-mono); font-size: 10px; color: var(--gray-500); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .stat-card .value { font-family: var(--font-display); font-weight: 800; font-size: 2rem; color: var(--ink); letter-spacing: -0.02em; }
+
+    .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .tab-btn {
+      padding: 0.5rem 1.25rem; border-radius: 9999px; border: 1px solid var(--gray-200);
+      background: white; cursor: pointer; font-family: var(--font-body); font-size: 13px;
+      font-weight: 600; color: var(--gray-500); transition: all 0.15s;
+    }
+    .tab-btn.active { background: var(--ink); color: white; border-color: var(--ink); }
+    .tab-btn:hover:not(.active) { border-color: var(--gray-400); }
+    .tab-btn .count {
+      display: inline-block; background: var(--gray-100); color: var(--gray-500);
+      font-family: var(--font-mono); font-size: 11px; padding: 1px 6px; border-radius: 9999px; margin-left: 6px;
+    }
+    .tab-btn.active .count { background: rgba(255,255,255,0.2); color: white; }
+
+    .table-wrap {
+      background: white; border: 1px solid var(--gray-200); border-radius: 12px; overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead { background: var(--gray-50); }
+    th {
+      text-align: left; padding: 0.75rem 1rem; font-family: var(--font-mono); font-size: 10px;
+      color: var(--gray-500); letter-spacing: 0.08em; text-transform: uppercase;
+      border-bottom: 1px solid var(--gray-200); white-space: nowrap;
+    }
+    td {
+      padding: 0.75rem 1rem; border-bottom: 1px solid var(--gray-100);
+      color: var(--gray-700); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--gray-50); }
+
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 9999px;
+      font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.03em;
+    }
+    .badge-tenant { background: #dbeafe; color: #1d4ed8; }
+    .badge-owner { background: #fef3c7; color: #92400e; }
+    .badge-active { background: #dcfce7; color: var(--success); }
+    .badge-pending { background: #fef3c7; color: var(--warning); }
+    .badge-done { background: var(--gray-100); color: var(--gray-500); }
+    .badge-cancelled { background: #fee2e2; color: var(--danger); }
+    .badge-yes { background: #dcfce7; color: var(--success); }
+    .badge-no { background: #fee2e2; color: var(--danger); }
+
+    .id-col { font-family: var(--font-mono); font-size: 12px; color: var(--gray-400); }
+    .name-col { font-weight: 600; color: var(--ink); }
+    .price-col { font-family: var(--font-display); font-weight: 700; color: var(--ink); }
+    .date-col { font-family: var(--font-mono); font-size: 11px; color: var(--gray-400); }
+
+    .empty-state {
+      text-align: center; padding: 3rem; color: var(--gray-400);
+      font-family: var(--font-display); font-size: 1rem;
+    }
+    .loading { text-align: center; padding: 4rem; color: var(--gray-400); font-size: 14px; }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div>
+      <h1>WareHub Admin</h1>
+      <div class="sub">DATABASE VIEWER</div>
+    </div>
+    <div style="display:flex;gap:0.75rem;align-items:center;">
+      <button onclick="loadData()">Refresh Data</button>
+      <a href="index.html" style="color:rgba(255,255,255,0.5);font-size:13px;text-decoration:none;">← Kembali</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="stats-row" id="stats-row">
+      <div class="stat-card"><div class="label">Total Users</div><div class="value" id="s-users">—</div></div>
+      <div class="stat-card"><div class="label">Penyewa</div><div class="value" id="s-tenants">—</div></div>
+      <div class="stat-card"><div class="label">Pemilik</div><div class="value" id="s-owners">—</div></div>
+      <div class="stat-card"><div class="label">Gudang</div><div class="value" id="s-warehouses">—</div></div>
+      <div class="stat-card"><div class="label">Bookings</div><div class="value" id="s-bookings">—</div></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('users', this)">Users <span class="count" id="c-users">0</span></button>
+      <button class="tab-btn" onclick="switchTab('warehouses', this)">Gudang <span class="count" id="c-warehouses">0</span></button>
+      <button class="tab-btn" onclick="switchTab('bookings', this)">Bookings <span class="count" id="c-bookings">0</span></button>
+    </div>
+
+    <div id="tab-users" class="table-wrap">
+      <div class="loading">Memuat data...</div>
+    </div>
+    <div id="tab-warehouses" class="table-wrap hidden">
+      <div class="loading">Memuat data...</div>
+    </div>
+    <div id="tab-bookings" class="table-wrap hidden">
+      <div class="loading">Memuat data...</div>
+    </div>
+  </div>
+
+  <script>
+    function formatRupiah(n) {
+      return 'Rp ' + Number(n).toLocaleString('id-ID');
+    }
+
+    function switchTab(id, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.table-wrap').forEach(t => t.classList.add('hidden'));
+      document.getElementById('tab-' + id).classList.remove('hidden');
+    }
+
+    async function loadData() {
+      try {
+        const res = await fetch(window.location.origin + '/api/admin/tables');
+        const data = await res.json();
+        if (!data.success) return;
+
+        // Stats
+        document.getElementById('s-users').textContent = data.stats.totalUsers;
+        document.getElementById('s-tenants').textContent = data.stats.tenants;
+        document.getElementById('s-owners').textContent = data.stats.owners;
+        document.getElementById('s-warehouses').textContent = data.stats.totalWarehouses;
+        document.getElementById('s-bookings').textContent = data.stats.totalBookings;
+        document.getElementById('c-users').textContent = data.stats.totalUsers;
+        document.getElementById('c-warehouses').textContent = data.stats.totalWarehouses;
+        document.getElementById('c-bookings').textContent = data.stats.totalBookings;
+
+        // Users table
+        if (data.users.rows.length === 0) {
+          document.getElementById('tab-users').innerHTML = '<div class="empty-state">Belum ada user.</div>';
+        } else {
+          document.getElementById('tab-users').innerHTML = `<table>
+            <thead><tr><th>ID</th><th>Nama</th><th>Email</th><th>Role</th><th>Telepon</th><th>Dibuat</th></tr></thead>
+            <tbody>${data.users.rows.map(r => `<tr>
+              <td class="id-col">${r[0]}</td>
+              <td class="name-col">${r[1]}</td>
+              <td>${r[2]}</td>
+              <td><span class="badge badge-${r[3]}">${r[3].toUpperCase()}</span></td>
+              <td>${r[4] || '—'}</td>
+              <td class="date-col">${r[5]}</td>
+            </tr>`).join('')}</tbody></table>`;
+        }
+
+        // Warehouses table
+        if (data.warehouses.rows.length === 0) {
+          document.getElementById('tab-warehouses').innerHTML = '<div class="empty-state">Belum ada gudang.</div>';
+        } else {
+          document.getElementById('tab-warehouses').innerHTML = `<table>
+            <thead><tr><th>ID</th><th>Owner</th><th>Nama</th><th>Lokasi</th><th>Ukuran</th><th>Harga/hari</th><th>Status</th><th>Rating</th><th>Dibuat</th></tr></thead>
+            <tbody>${data.warehouses.rows.map(r => `<tr>
+              <td class="id-col">${r[0]}</td>
+              <td class="id-col">${r[1]}</td>
+              <td class="name-col">${r[2]}</td>
+              <td>${r[3]}</td>
+              <td>${r[5]} m²</td>
+              <td class="price-col">${formatRupiah(r[6])}</td>
+              <td><span class="badge ${r[7] ? 'badge-yes' : 'badge-no'}">${r[7] ? 'AKTIF' : 'NONAKTIF'}</span></td>
+              <td>${r[8] ? '★ ' + r[8] + ' (' + r[9] + ')' : '—'}</td>
+              <td class="date-col">${r[10]}</td>
+            </tr>`).join('')}</tbody></table>`;
+        }
+
+        // Bookings table
+        if (data.bookings.rows.length === 0) {
+          document.getElementById('tab-bookings').innerHTML = '<div class="empty-state">Belum ada booking.</div>';
+        } else {
+          document.getElementById('tab-bookings').innerHTML = `<table>
+            <thead><tr><th>ID</th><th>Penyewa</th><th>Gudang</th><th>Mulai</th><th>Selesai</th><th>Hari</th><th>Total</th><th>Status</th><th>Dibuat</th></tr></thead>
+            <tbody>${data.bookings.rows.map(r => `<tr>
+              <td class="id-col">${r[0]}</td>
+              <td class="name-col">${r[3]}</td>
+              <td>${r[4]}</td>
+              <td class="date-col">${r[5]}</td>
+              <td class="date-col">${r[6]}</td>
+              <td>${r[7]}</td>
+              <td class="price-col">${formatRupiah(r[8])}</td>
+              <td><span class="badge badge-${r[9]}">${r[9].toUpperCase()}</span></td>
+              <td class="date-col">${r[10]}</td>
+            </tr>`).join('')}</tbody></table>`;
+        }
+      } catch (err) {
+        console.error('Gagal memuat data admin:', err);
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>

@@ -117,13 +117,37 @@
     const user = getCurrentUser();
 
     const id = parseInt(new URLSearchParams(location.search).get('id') || '1');
-    const w = warehouses.find(x => x.id === id) || warehouses[0];
+    let w = null;
+
+    async function loadWarehouseDetail() {
+      try {
+        const res = await fetch(window.location.origin + '/api/warehouses/' + id);
+        const data = await res.json();
+        if (data.success) {
+          w = data.warehouse;
+          w.available = w.available === 1 || w.available === true;
+          w.facilities = Array.isArray(w.facilities) ? w.facilities : [];
+          w.rating = w.rating || 0;
+          w.reviews = w.reviews || 0;
+          w.address = w.address || w.location;
+          w.description = w.description || 'Gudang ini tersedia untuk disewa.';
+          if (w.image && w.image.startsWith('/uploads/')) { /* keep */ }
+          else if (!w.image) w.image = 'assets/images/placeholder-warehouse.svg';
+          renderDetail();
+        } else {
+          document.getElementById('detail-content').innerHTML = '<div style="text-align:center;padding:4rem;color:var(--color-gray-500);">Gudang tidak ditemukan.</div>';
+        }
+      } catch (err) {
+        console.error('Gagal memuat detail gudang:', err);
+        document.getElementById('detail-content').innerHTML = '<div style="text-align:center;padding:4rem;color:var(--color-gray-500);">Gagal memuat data gudang.</div>';
+      }
+    }
+
+    function renderDetail() {
     document.getElementById('bc-name').textContent = w.name;
     document.title = w.name + ' — WareHub';
 
-    // Gallery uses 4 of the available 6 images
-    const galleryImgs = warehouses.slice(0, 4).map(x => x.image);
-    galleryImgs[0] = w.image;
+    const galleryImgs = [w.image, w.image, w.image, w.image];
 
     const facIcons = {
       'CCTV': 'assets/icons/check.svg',
@@ -357,6 +381,10 @@
       });
       window.location.href = 'booking.html';
     }
+
+    } // end renderDetail()
+
+    loadWarehouseDetail();
   </script>
 </body>
 </html>

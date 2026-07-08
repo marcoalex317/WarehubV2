@@ -127,16 +127,17 @@
       });
     }
 
-    function doRegister(e) {
+    async function doRegister(e) {
       e.preventDefault();
       const name = document.getElementById('name').value.trim();
       const email = document.getElementById('email').value.trim();
       const pw = document.getElementById('password').value;
-      const result = register(name, email, pw, role);
       const errBox = document.getElementById('err');
+      errBox.style.display = 'none';
+
+      const result = await register(name, email, pw, role);
 
       if (result.success) {
-        saveSession(result.user);
         showToast('Akun berhasil dibuat!');
         setTimeout(() => {
           window.location.href = role === 'tenant' ? 'dashboard-tenant.html' : 'dashboard-owner.html';
