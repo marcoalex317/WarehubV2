@@ -75,8 +75,8 @@
                 <input id="b-start" type="date" />
               </div>
               <div class="field">
-                <label>Check-out</label>
-                <input id="b-end" type="date" readonly />
+                <label>Check-out <span style="font-size:10px;color:var(--color-gray-400);font-weight:400;">(otomatis)</span></label>
+                <input id="b-end" type="date" readonly style="background:var(--color-gray-50);color:var(--color-gray-600);" />
               </div>
             </div>
             <div class="field">
@@ -234,6 +234,7 @@
     }
 
     function initBookingForm() {
+      document.getElementById('b-start').min = todayISO();
       document.getElementById('b-start').value = bookingData.startDate || todayISO();
       document.getElementById('b-dur').value = String(bookingData.days || 30);
       if (user) {

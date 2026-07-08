@@ -262,12 +262,12 @@
           <div class="detail-section">
             <h3>Tentang pemilik</h3>
             <div style="display: flex; align-items: center; gap: 1rem; padding: 1.25rem; border: var(--border-subtle); border-radius: var(--radius-lg);">
-              <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--color-ink-900); color: white; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 1.25rem;">B</div>
+              <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--color-ink-900); color: white; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 1.25rem;">${(w.owner_name || 'P').charAt(0)}</div>
               <div style="flex: 1;">
-                <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); margin-bottom: 2px;">Budi Santoso</div>
-                <div style="font-size: var(--font-size-sm); color: var(--color-gray-500);">Bergabung sejak 2022 · 12 gudang aktif · respon &lt; 30 menit</div>
+                <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); margin-bottom: 2px;">${w.owner_name || 'Pemilik'}</div>
+                <div style="font-size: var(--font-size-sm); color: var(--color-gray-500);">Pemilik gudang · respon &lt; 30 menit</div>
               </div>
-              <button class="btn btn-outline btn-sm">Hubungi</button>
+              <button class="btn btn-outline btn-sm" onclick="window.location.href='messages.html?owner='+encodeURIComponent(w.owner_name||'Pemilik')+'&warehouse='+encodeURIComponent(w.name)">Hubungi</button>
             </div>
           </div>
 
@@ -307,11 +307,11 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.75rem;">
               <div>
                 <label style="font-size: 11px; font-family: var(--font-mono); color: var(--color-gray-500); letter-spacing: 0.06em;">CHECK-IN</label>
-                <input type="date" id="d-start" style="width: 100%; padding: 0.65rem; border: var(--border-subtle); border-radius: var(--radius-md); margin-top: 4px; font-size: var(--font-size-sm); outline: none;" />
+                <input type="date" id="d-start" min="${todayISO()}" style="width: 100%; padding: 0.65rem; border: var(--border-subtle); border-radius: var(--radius-md); margin-top: 4px; font-size: var(--font-size-sm); outline: none;" />
               </div>
               <div>
                 <label style="font-size: 11px; font-family: var(--font-mono); color: var(--color-gray-500); letter-spacing: 0.06em;">CHECK-OUT</label>
-                <input type="date" id="d-end" style="width: 100%; padding: 0.65rem; border: var(--border-subtle); border-radius: var(--radius-md); margin-top: 4px; font-size: var(--font-size-sm); outline: none;" />
+                <input type="date" id="d-end" readonly style="width: 100%; padding: 0.65rem; border: var(--border-subtle); border-radius: var(--radius-md); margin-top: 4px; font-size: var(--font-size-sm); outline: none; background: var(--color-gray-50); color: var(--color-gray-600);" />
               </div>
             </div>
 
@@ -350,15 +350,6 @@
 
     document.getElementById('detail-content').innerHTML = html;
 
-    function updatePricing() {
-      const days = parseInt(document.getElementById('d-dur').value);
-      const { subtotal, fee, total } = calcBookingPrice(w.price, days);
-      document.getElementById('b-sub-label').textContent = `${formatRupiah(w.price)} × ${days} hari`;
-      document.getElementById('b-sub').textContent = formatRupiah(subtotal);
-      document.getElementById('b-fee').textContent = formatRupiah(fee);
-      document.getElementById('b-total').textContent = formatRupiah(total);
-    }
-
     document.getElementById('d-dur').addEventListener('change', updatePricing);
     document.getElementById('d-start').addEventListener('change', () => {
       const start = document.getElementById('d-start').value;
@@ -373,7 +364,44 @@
     document.getElementById('d-start').dispatchEvent(new Event('change'));
     updatePricing();
 
+    const curUser = getCurrentUser();
+    if (curUser && curUser.role === 'owner' && curUser.id === w.owner_id) {
+      const sidebar = document.querySelector('.booking-card');
+      if (sidebar) sidebar.innerHTML = `
+        <div style="text-align:center;padding:2rem;">
+          <div style="font-family:var(--font-display);font-weight:700;font-size:1.125rem;color:var(--color-ink-900);margin-bottom:0.5rem;">Ini gudang milikmu</div>
+          <p style="font-size:13px;color:var(--color-gray-500);margin-bottom:1rem;">Kelola gudang ini dari dashboard pemilik.</p>
+          <a href="dashboard-owner.html" class="btn btn-primary" style="width:100%;justify-content:center;">Buka Dashboard</a>
+        </div>`;
+    } else if (curUser && curUser.role === 'owner') {
+      const bookBtn = document.querySelector('.booking-card .btn-primary.btn-lg');
+      if (bookBtn) {
+        bookBtn.textContent = 'Booking sebagai penyewa';
+        bookBtn.style.opacity = '0.5';
+        bookBtn.style.pointerEvents = 'none';
+        bookBtn.insertAdjacentHTML('afterend', '<p style="text-align:center;font-size:11px;color:var(--color-gray-500);margin-top:0.5rem;">Login sebagai penyewa untuk booking.</p>');
+      }
+    }
+
+    } // end renderDetail()
+
+    function updatePricing() {
+      if (!w) return;
+      const days = parseInt(document.getElementById('d-dur').value);
+      const { subtotal, fee, total } = calcBookingPrice(w.price, days);
+      document.getElementById('b-sub-label').textContent = `${formatRupiah(w.price)} × ${days} hari`;
+      document.getElementById('b-sub').textContent = formatRupiah(subtotal);
+      document.getElementById('b-fee').textContent = formatRupiah(fee);
+      document.getElementById('b-total').textContent = formatRupiah(total);
+    }
+
     function goBook() {
+      if (!w) return;
+      if (!getCurrentUser()) {
+        showToast('Silakan login terlebih dahulu.');
+        setTimeout(() => { window.location.href = 'login.html'; }, 1000);
+        return;
+      }
       saveBookingData({
         warehouseId: w.id,
         startDate: document.getElementById('d-start').value,
@@ -381,8 +409,6 @@
       });
       window.location.href = 'booking.html';
     }
-
-    } // end renderDetail()
 
     loadWarehouseDetail();
   </script>

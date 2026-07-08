@@ -123,24 +123,24 @@
 
           <div class="grid grid-4 gap-4" style="margin-bottom: 2rem;">
             <div class="stat-card">
-              <div class="lbl">Penghasilan Bulan Ini</div>
-              <div class="val">Rp 3,9jt</div>
-              <div class="delta up">↑ 12% bulan lalu</div>
+              <div class="lbl">Total Penghasilan</div>
+              <div class="val" id="stat-income">—</div>
+              <div class="delta up" id="stat-income-delta"></div>
             </div>
             <div class="stat-card">
               <div class="lbl">Booking Aktif</div>
-              <div class="val">8</div>
-              <div class="delta up">↑ 2 minggu ini</div>
+              <div class="val" id="stat-bookings">—</div>
+              <div class="delta up" id="stat-bookings-delta"></div>
             </div>
             <div class="stat-card">
-              <div class="lbl">Tingkat Hunian</div>
-              <div class="val">85%</div>
-              <div class="delta up">Target 80%</div>
+              <div class="lbl">Total Gudang</div>
+              <div class="val" id="stat-gudang">—</div>
+              <div class="delta" id="stat-gudang-delta"></div>
             </div>
             <div class="stat-card">
-              <div class="lbl">Rating Pemilik</div>
-              <div class="val">4.8</div>
-              <div class="delta up">↑ dari 4.6</div>
+              <div class="lbl">Rating Rata-rata</div>
+              <div class="val" id="stat-rating">—</div>
+              <div class="delta" id="stat-rating-delta"></div>
             </div>
           </div>
 
@@ -171,7 +171,7 @@
             <div class="panel">
               <div class="panel-head">
                 <h3>Perlu konfirmasi</h3>
-                <span class="badge" style="background:var(--color-warning-light);color:var(--color-warning);">2 baru</span>
+                <span class="badge" style="background:var(--color-warning-light);color:var(--color-warning);" id="pending-badge">—</span>
               </div>
               <div id="pending-list"></div>
             </div>
@@ -466,7 +466,15 @@
         const data = await res.json();
         if (!data.success) return;
 
+        const activeBookings = data.bookings.filter(b => b.status === 'active' || b.status === 'pending');
+        const totalIncome = data.bookings.reduce((sum, b) => sum + b.total_price, 0);
+        document.getElementById('stat-income').textContent = formatRupiah(totalIncome);
+        document.getElementById('stat-bookings').textContent = activeBookings.length;
+        document.getElementById('stat-bookings-delta').textContent = activeBookings.length > 0 ? activeBookings.length + ' sedang berjalan' : 'Belum ada';
+
         const pendingBookings = data.bookings.filter(b => b.status === 'pending');
+        document.getElementById('pending-badge').textContent = pendingBookings.length > 0 ? pendingBookings.length + ' baru' : '0';
+
         document.getElementById('pending-list').innerHTML = pendingBookings.map(b => `
           <div style="padding:0.75rem 0;border-bottom:1px dashed var(--color-gray-200);">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem;">
@@ -515,6 +523,14 @@
         const data = await res.json();
         if (data.success) {
           myWarehouses = data.warehouses;
+          document.getElementById('stat-gudang').textContent = myWarehouses.length;
+          document.getElementById('stat-gudang-delta').textContent = myWarehouses.filter(w => w.available).length + ' aktif';
+          if (myWarehouses.length > 0) {
+            const avgRating = myWarehouses.reduce((s, w) => s + (w.rating || 0), 0) / myWarehouses.length;
+            document.getElementById('stat-rating').textContent = avgRating.toFixed(1);
+          } else {
+            document.getElementById('stat-rating').textContent = '—';
+          }
           renderListingsTable();
           renderListingsGrid();
         }

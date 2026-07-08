@@ -48,7 +48,7 @@
     <!-- Search header -->
     <section style="background: var(--color-white); border-bottom: var(--border-subtle); padding: 2rem 0;">
       <div class="container">
-        <div class="eyebrow" style="margin-bottom: 0.75rem;">1.240 gudang aktif</div>
+        <div class="eyebrow" style="margin-bottom: 0.75rem;" id="total-gudang">Memuat gudang...</div>
         <h2 style="font-size: 1.75rem; color: var(--color-ink-900); margin-bottom: 1.25rem; letter-spacing: -0.02em;">Temukan gudang yang pas.</h2>
         <div class="search-bar" style="max-width: 760px; padding: 8px 8px 8px 22px;">
           <img src="assets/icons/location.svg" alt="" style="width: 16px; height: 16px; opacity: 0.5;" />
@@ -139,7 +139,7 @@
             <div class="grid grid-2 gap-4" id="results-grid"></div>
 
             <div style="text-align: center; margin-top: 3rem; padding-top: 2rem; border-top: var(--border-subtle);">
-              <p style="font-size: var(--font-size-sm); color: var(--color-gray-500); margin-bottom: 1rem;">Menampilkan 6 dari 1.240 gudang</p>
+              <p style="font-size: var(--font-size-sm); color: var(--color-gray-500); margin-bottom: 1rem;" id="result-summary">Memuat...</p>
               <button class="btn btn-outline">Muat lebih banyak</button>
             </div>
           </div>
@@ -222,6 +222,7 @@
       } catch (err) {
         console.error('Gagal memuat gudang:', err);
       }
+      document.getElementById('total-gudang').textContent = warehouses.length + ' gudang aktif';
       applyFilters();
     }
 
@@ -235,7 +236,7 @@
       const availBadge = w.available
         ? `<span class="badge badge-success"><span class="dot dot-success"></span>Tersedia</span>`
         : `<span class="badge badge-gray">Penuh</span>`;
-      const tags = (w.facilities || []).slice(0, 2).map(t => `<span class="badge badge-gray">${t}</span>`).join('');
+      const tags = (w.facilities || []).slice(0, 2).map(t => `<span class="badge badge-gray" style="margin-left:4px;">${t}</span>`).join('');
       const isSelected = compareList.includes(w.id);
       const imgSrc = getWarehouseImage(w);
       return `
@@ -379,6 +380,7 @@
         grid.innerHTML = filtered.map(buildCard).join('');
       }
       document.getElementById('result-count').textContent = `${filtered.length} gudang ditemukan`;
+      document.getElementById('result-summary').textContent = `Menampilkan ${filtered.length} dari ${warehouses.length} gudang`;
       document.getElementById('result-sub').textContent = q ? `Hasil untuk "${q}"` : `Diurutkan berdasarkan ${document.getElementById('sort').selectedOptions[0].text.toLowerCase()}`;
     }
 

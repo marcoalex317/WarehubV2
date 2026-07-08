@@ -286,10 +286,7 @@
       }
     ];
 
-    // Support selalu tampil; owner lihat semua; tenant hanya lihat owner + support
-    const convs = myRole === 'tenant'
-      ? allConvs.filter(c => c.isSupport || c.id === 'conv_budi_cawang')
-      : allConvs;
+    const convs = allConvs;
 
     let activeConvId = null;
 
@@ -450,15 +447,37 @@
       el.style.height = Math.min(el.scrollHeight, 120) + 'px';
     }
 
-    // Buka percakapan pertama dari URL param jika ada
     const urlParams = new URLSearchParams(location.search);
     const openConvId = urlParams.get('conv');
+    const ownerParam = urlParams.get('owner');
+    const warehouseParam = urlParams.get('warehouse');
 
-    renderContacts();
-    if (openConvId && convs.some(c => c.id === openConvId)) {
+    if (ownerParam) {
+      const dynamicId = 'conv_dynamic_' + ownerParam.replace(/\s+/g, '_').toLowerCase();
+      if (!allConvs.some(c => c.id === dynamicId)) {
+        const newConv = {
+          id: dynamicId,
+          contactName: ownerParam,
+          contactRole: warehouseParam ? 'Pemilik — ' + warehouseParam : 'Pemilik Gudang',
+          contactInitial: ownerParam.charAt(0).toUpperCase(),
+          avatarColor: '#0B1220',
+          lastTime: getNow(),
+          unread: false,
+          defaultMessages: [
+            { sender: 'other', text: 'Halo! Ada yang bisa saya bantu terkait ' + (warehouseParam || 'gudang') + '?', time: getNow() }
+          ]
+        };
+        allConvs.unshift(newConv);
+        if (!convs.some(c => c.id === dynamicId)) convs.unshift(newConv);
+      }
+      renderContacts();
+      openConv(dynamicId);
+    } else if (openConvId && convs.some(c => c.id === openConvId)) {
+      renderContacts();
       openConv(openConvId);
-    } else if (convs.length > 0) {
-      openConv(convs[0].id);
+    } else {
+      renderContacts();
+      if (convs.length > 0) openConv(convs[0].id);
     }
   </script>
 

@@ -329,4 +329,12 @@ document.addEventListener("DOMContentLoaded", function () {
   initFilterSelects();
   initBookingCalc();
   initDateInputs();
+
+  document.addEventListener("click", function (e) {
+    const link = e.target.closest('a[href="#"]');
+    if (link && !link.hasAttribute('onclick')) {
+      e.preventDefault();
+      showToast("Halaman ini belum tersedia.");
+    }
+  });
 });

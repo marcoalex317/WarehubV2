@@ -93,11 +93,12 @@ async function seed(db) {
     }
   ];
 
-  demoWarehouses.forEach(w => {
+  demoWarehouses.forEach((w, i) => {
+    const image = 'assets/images/gudang-' + (i + 1) + '.jpg';
     db.run(
       `INSERT INTO warehouses (owner_id, name, location, address, size, price, description, image, facilities, available, rating, reviews)
-       VALUES (?, ?, ?, ?, ?, ?, ?, '', ?, 1, ?, ?)`,
-      [ownerId, w.name, w.location, w.address, w.size, w.price, w.description, w.facilities, w.rating, w.reviews]
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`,
+      [ownerId, w.name, w.location, w.address, w.size, w.price, w.description, image, w.facilities, w.rating, w.reviews]
     );
   });
 

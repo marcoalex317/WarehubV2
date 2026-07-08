@@ -73,18 +73,20 @@
 
       <form id="reg-form" onsubmit="doRegister(event)">
         <label style="display: block; font-size: 12px; font-family: var(--font-mono); color: var(--color-gray-600); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px;">Saya ingin mendaftar sebagai</label>
-        <div class="role-picker">
-          <div class="role-tile selected" data-role="tenant" onclick="pickRole('tenant')">
+        <fieldset class="role-picker" style="border:none;padding:0;margin:0;">
+          <label class="role-tile selected" data-role="tenant" onclick="pickRole('tenant')">
+            <input type="radio" name="role" value="tenant" checked style="position:absolute;opacity:0;pointer-events:none;" />
             <div class="ico"><img src="assets/icons/box.svg" alt="" style="width: 18px; height: 18px;" /></div>
             <h6>Penyewa</h6>
             <p>Cari dan sewa gudang untuk simpan barang.</p>
-          </div>
-          <div class="role-tile" data-role="owner" onclick="pickRole('owner')">
+          </label>
+          <label class="role-tile" data-role="owner" onclick="pickRole('owner')">
+            <input type="radio" name="role" value="owner" style="position:absolute;opacity:0;pointer-events:none;" />
             <div class="ico"><img src="assets/icons/warehouse.svg" alt="" style="width: 18px; height: 18px;" /></div>
             <h6>Pemilik</h6>
             <p>Daftarkan gudangmu, terima penyewa.</p>
-          </div>
-        </div>
+          </label>
+        </fieldset>
 
         <div class="field">
           <label>Nama lengkap</label>
@@ -123,7 +125,10 @@
     function pickRole(r) {
       role = r;
       document.querySelectorAll('.role-tile').forEach(t => {
-        t.classList.toggle('selected', t.dataset.role === r);
+        const isSelected = t.dataset.role === r;
+        t.classList.toggle('selected', isSelected);
+        const radio = t.querySelector('input[type="radio"]');
+        if (radio) radio.checked = isSelected;
       });
     }
 
