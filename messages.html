@@ -218,7 +218,6 @@
   </div>
 
   <div class="toast" id="toast"></div>
-  <script src="assets/js/data.js"></script>
   <script src="assets/js/auth.js"></script>
   <script src="assets/js/main.js"></script>
   <script>
@@ -320,12 +319,13 @@
         const last = msgs.length ? msgs[msgs.length - 1] : null;
         const preview = last ? last.text : '';
         const isActive = c.id === activeConvId;
+        const previewText = preview.length > 36 ? preview.slice(0,36)+'…' : preview;
         return `
           <div class="contact-item ${isActive ? 'active' : ''}" onclick="openConv('${c.id}')">
-            <div class="contact-avatar" style="background:${c.avatarColor};">${c.contactInitial}</div>
+            <div class="contact-avatar" style="background:${c.avatarColor};">${escapeHtml(c.contactInitial)}</div>
             <div class="contact-info">
-              <div class="contact-name">${c.contactName}</div>
-              <div class="contact-sub">${preview.length > 36 ? preview.slice(0,36)+'…' : preview}</div>
+              <div class="contact-name">${escapeHtml(c.contactName)}</div>
+              <div class="contact-sub">${escapeHtml(previewText)}</div>
             </div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
               <div class="contact-time">${c.lastTime}</div>
@@ -347,7 +347,7 @@
         const senderLabel = isMine ? myName : conv.contactName;
         return `
           <div class="msg-row ${m.sender}">
-            ${!isMine ? `<div class="msg-sender-name">${senderLabel}</div>` : ''}
+            ${!isMine ? `<div class="msg-sender-name">${escapeHtml(senderLabel)}</div>` : ''}
             <div class="msg-bubble ${m.sender}">${escapeHtml(m.text)}</div>
             <div class="msg-time">${m.time}</div>
           </div>`;
@@ -355,9 +355,7 @@
       box.scrollTop = box.scrollHeight;
     }
 
-    function escapeHtml(t) {
-      return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
+    // escapeHtml() dipakai dari assets/js/main.js.
 
     function openConv(convId) {
       activeConvId = convId;
@@ -369,10 +367,10 @@
       activeEl.style.display = 'flex';
 
       document.getElementById('chat-header').innerHTML = `
-        <div class="contact-avatar" style="background:${conv.avatarColor};width:38px;height:38px;font-size:0.9rem;">${conv.contactInitial}</div>
+        <div class="contact-avatar" style="background:${conv.avatarColor};width:38px;height:38px;font-size:0.9rem;">${escapeHtml(conv.contactInitial)}</div>
         <div style="flex:1;">
-          <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:15px;">${conv.contactName}</div>
-          <div style="font-size:12px;color:var(--color-gray-500);margin-top:1px;">${conv.contactRole}</div>
+          <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:15px;">${escapeHtml(conv.contactName)}</div>
+          <div style="font-size:12px;color:var(--color-gray-500);margin-top:1px;">${escapeHtml(conv.contactRole)}</div>
         </div>
         <div style="display:flex;align-items:center;gap:0.5rem;">
           <span class="dot dot-success"></span>

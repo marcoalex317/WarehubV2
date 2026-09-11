@@ -479,8 +479,8 @@
           <div style="padding:0.75rem 0;border-bottom:1px dashed var(--color-gray-200);">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem;">
               <div>
-                <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:14px;">${b.tenant_name}</div>
-                <div style="font-size:12px;color:var(--color-gray-500);margin-top:2px;">${b.warehouse_name} · ${b.days} hari · ${b.start_date}</div>
+                <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:14px;">${escapeHtml(b.tenant_name)}</div>
+                <div style="font-size:12px;color:var(--color-gray-500);margin-top:2px;">${escapeHtml(b.warehouse_name)} · ${b.days} hari · ${escapeHtml(b.start_date)}</div>
               </div>
               <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:14px;">${formatRupiah(b.total_price)}</div>
             </div>
@@ -499,10 +499,10 @@
           };
           return `
             <div style="display:grid;grid-template-columns:36px 1fr auto auto;gap:1rem;align-items:center;padding:0.875rem 0;border-bottom:1px dashed var(--color-gray-200);">
-              <div style="width:36px;height:36px;border-radius:50%;background:var(--color-primary-light);color:var(--color-primary);display:flex;align-items:center;justify-content:center;font-weight:700;">${b.tenant_name.charAt(0)}</div>
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--color-primary-light);color:var(--color-primary);display:flex;align-items:center;justify-content:center;font-weight:700;">${escapeHtml(b.tenant_name.charAt(0))}</div>
               <div>
-                <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:14px;">${b.tenant_name}</div>
-                <div style="font-size:12px;color:var(--color-gray-500);">${b.warehouse_name} · ${b.days} hari · ${b.start_date}</div>
+                <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:14px;">${escapeHtml(b.tenant_name)}</div>
+                <div style="font-size:12px;color:var(--color-gray-500);">${escapeHtml(b.warehouse_name)} · ${b.days} hari · ${escapeHtml(b.start_date)}</div>
               </div>
               <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);">${formatRupiah(b.total_price)}</div>
               ${statusMap[b.status] || statusMap.pending}
@@ -557,8 +557,8 @@
         return `
           <div class="listing-row">
             <div>
-              <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:14px;">${l.name}</div>
-              <div style="font-size:12px;color:var(--color-gray-500);">${l.location}</div>
+              <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);font-size:14px;">${escapeHtml(l.name)}</div>
+              <div style="font-size:12px;color:var(--color-gray-500);">${escapeHtml(l.location)}</div>
             </div>
             <div style="font-size:13px;color:var(--color-gray-700);">${l.size} m²</div>
             <div style="text-align:right;font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);">${formatRupiah(l.price)}</div>
@@ -579,14 +579,14 @@
           : `<span class="badge badge-gray">Nonaktif</span>`;
         const img = getWarehouseImage(l);
         const facs = Array.isArray(l.facilities) ? l.facilities : [];
-        const tags = facs.slice(0, 2).map(f => `<span class="badge badge-gray">${f}</span>`).join('');
+        const tags = facs.slice(0, 2).map(f => `<span class="badge badge-gray">${escapeHtml(f)}</span>`).join('');
         return `
           <div class="card warehouse-card">
             <div class="warehouse-card-availability">${statusBadge}</div>
-            <img src="${img}" alt="" class="warehouse-card-img" />
+            <img src="${escapeHtml(img)}" alt="" class="warehouse-card-img" />
             <div class="card-body">
-              <div class="warehouse-card-name">${l.name}</div>
-              <div class="warehouse-card-loc"><img src="assets/icons/location.svg" alt="" />${l.location}</div>
+              <div class="warehouse-card-name">${escapeHtml(l.name)}</div>
+              <div class="warehouse-card-loc"><img src="assets/icons/location.svg" alt="" />${escapeHtml(l.location)}</div>
               <div class="warehouse-card-tags"><span class="badge badge-gray">${l.size} m²</span>${tags}</div>
               <div class="warehouse-card-bottom">
                 <div class="warehouse-price">${formatRupiah(l.price)}<span> /hari</span></div>

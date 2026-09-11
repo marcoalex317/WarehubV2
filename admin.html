@@ -115,7 +115,9 @@
       <div class="sub">DATABASE VIEWER</div>
     </div>
     <div style="display:flex;gap:0.75rem;align-items:center;">
+      <span id="admin-whoami" style="font-size:12px;color:rgba(255,255,255,0.5);"></span>
       <button onclick="loadData()">Refresh Data</button>
+      <button onclick="logout()">Keluar</button>
       <a href="index.html" style="color:rgba(255,255,255,0.5);font-size:13px;text-decoration:none;">← Kembali</a>
     </div>
   </div>
@@ -146,7 +148,22 @@
     </div>
   </div>
 
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/main.js"></script>
   <script>
+    // Halaman ini hanya boleh dibuka oleh user yang login dan berrole admin.
+    // Endpoint /api/admin/tables sendiri juga sudah diproteksi di backend
+    // (authenticateToken + requireRole('admin')) — pengecekan di sini
+    // hanya supaya non-admin langsung diarahkan pergi, bukan melihat
+    // halaman kosong / pesan error dari API.
+    if (!requireLogin('login.html')) {
+      // requireLogin sudah redirect ke login.html
+    } else if (getCurrentRole() !== 'admin') {
+      window.location.href = 'index.html';
+    } else {
+      document.getElementById('admin-whoami').textContent = getCurrentUser().email;
+    }
+
     function formatRupiah(n) {
       return 'Rp ' + Number(n).toLocaleString('id-ID');
     }
@@ -160,8 +177,12 @@
 
     async function loadData() {
       try {
-        const res = await fetch(window.location.origin + '/api/admin/tables');
+        const res = await apiFetch('/admin/tables');
         const data = await res.json();
+        if (res.status === 401 || res.status === 403) {
+          window.location.href = 'login.html';
+          return;
+        }
         if (!data.success) return;
 
         // Stats
@@ -182,11 +203,11 @@
             <thead><tr><th>ID</th><th>Nama</th><th>Email</th><th>Role</th><th>Telepon</th><th>Dibuat</th></tr></thead>
             <tbody>${data.users.rows.map(r => `<tr>
               <td class="id-col">${r[0]}</td>
-              <td class="name-col">${r[1]}</td>
-              <td>${r[2]}</td>
-              <td><span class="badge badge-${r[3]}">${r[3].toUpperCase()}</span></td>
-              <td>${r[4] || '—'}</td>
-              <td class="date-col">${r[5]}</td>
+              <td class="name-col">${escapeHtml(r[1])}</td>
+              <td>${escapeHtml(r[2])}</td>
+              <td><span class="badge badge-${escapeHtml(r[3])}">${escapeHtml(r[3].toUpperCase())}</span></td>
+              <td>${escapeHtml(r[4]) || '—'}</td>
+              <td class="date-col">${escapeHtml(r[5])}</td>
             </tr>`).join('')}</tbody></table>`;
         }
 
@@ -199,13 +220,13 @@
             <tbody>${data.warehouses.rows.map(r => `<tr>
               <td class="id-col">${r[0]}</td>
               <td class="id-col">${r[1]}</td>
-              <td class="name-col">${r[2]}</td>
-              <td>${r[3]}</td>
+              <td class="name-col">${escapeHtml(r[2])}</td>
+              <td>${escapeHtml(r[3])}</td>
               <td>${r[5]} m²</td>
               <td class="price-col">${formatRupiah(r[6])}</td>
               <td><span class="badge ${r[7] ? 'badge-yes' : 'badge-no'}">${r[7] ? 'AKTIF' : 'NONAKTIF'}</span></td>
               <td>${r[8] ? '★ ' + r[8] + ' (' + r[9] + ')' : '—'}</td>
-              <td class="date-col">${r[10]}</td>
+              <td class="date-col">${escapeHtml(r[10])}</td>
             </tr>`).join('')}</tbody></table>`;
         }
 
@@ -217,14 +238,14 @@
             <thead><tr><th>ID</th><th>Penyewa</th><th>Gudang</th><th>Mulai</th><th>Selesai</th><th>Hari</th><th>Total</th><th>Status</th><th>Dibuat</th></tr></thead>
             <tbody>${data.bookings.rows.map(r => `<tr>
               <td class="id-col">${r[0]}</td>
-              <td class="name-col">${r[3]}</td>
-              <td>${r[4]}</td>
-              <td class="date-col">${r[5]}</td>
-              <td class="date-col">${r[6]}</td>
+              <td class="name-col">${escapeHtml(r[3])}</td>
+              <td>${escapeHtml(r[4])}</td>
+              <td class="date-col">${escapeHtml(r[5])}</td>
+              <td class="date-col">${escapeHtml(r[6])}</td>
               <td>${r[7]}</td>
               <td class="price-col">${formatRupiah(r[8])}</td>
-              <td><span class="badge badge-${r[9]}">${r[9].toUpperCase()}</span></td>
-              <td class="date-col">${r[10]}</td>
+              <td><span class="badge badge-${escapeHtml(r[9])}">${escapeHtml(r[9].toUpperCase())}</span></td>
+              <td class="date-col">${escapeHtml(r[10])}</td>
             </tr>`).join('')}</tbody></table>`;
         }
       } catch (err) {

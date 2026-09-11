@@ -172,12 +172,12 @@ function updateNavbar() {
           display: flex; align-items: center; justify-content: center;
           font-weight: 700; font-size: var(--font-size-sm);
           flex-shrink: 0;">
-          ${user.name.charAt(0).toUpperCase()}
+          ${escapeHtml(user.name.charAt(0).toUpperCase())}
         </div>
         <div style="font-size: var(--font-size-sm);">
           <div style="font-weight: 600; color: var(--color-gray-800);
                       white-space: nowrap;">
-            ${user.name}
+            ${escapeHtml(user.name)}
           </div>
           <div style="font-size: var(--font-size-xs); color: var(--color-gray-400);">
             ${user.role === "tenant" ? "Penyewa" : "Pemilik Gudang"}

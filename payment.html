@@ -181,7 +181,41 @@
     updateNavbar();
     const user = getCurrentUser();
     const data = getBookingData() || { warehouseId: 1, days: 30 };
-    const w = warehouses.find(x => x.id === data.warehouseId) || warehouses[0];
+    let w = null;
+    let subtotal = 0, fee = 0, total = 0;
+
+    async function loadWarehouseForPayment() {
+      try {
+        const res = await fetch(window.location.origin + '/api/warehouses/' + data.warehouseId);
+        const resData = await res.json();
+        if (!resData.success) throw new Error('not found');
+        w = resData.warehouse;
+        if (!w.image) w.image = 'assets/images/placeholder-warehouse.svg';
+      } catch (err) {
+        console.error('Gagal memuat data gudang untuk pembayaran:', err);
+        w = { id: data.warehouseId, name: 'Gudang', location: '-', price: 0, image: 'assets/images/placeholder-warehouse.svg' };
+      }
+
+      const calc = calcBookingPrice(w.price, data.days);
+      subtotal = calc.subtotal; fee = calc.fee; total = calc.total;
+
+      document.getElementById('summary').innerHTML = `
+        <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: var(--border-subtle);">
+          <img src="${escapeHtml(w.image)}" style="width: 56px; height: 56px; object-fit: cover; border-radius: 8px;" />
+          <div>
+            <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); font-size: 14px;">${escapeHtml(w.name)}</div>
+            <div style="font-size: 12px; color: var(--color-gray-500);">${escapeHtml(w.location)}</div>
+          </div>
+        </div>
+        <div class="pricing-row"><span style="color: var(--color-gray-600);">Durasi sewa</span><span style="color: var(--color-ink-900); font-weight: 600;">${data.days} hari</span></div>
+        <div class="pricing-row"><span style="color: var(--color-gray-600);">Subtotal</span><span style="color: var(--color-ink-900); font-weight: 600;">${formatRupiah(subtotal)}</span></div>
+        <div class="pricing-row"><span style="color: var(--color-gray-600);">Biaya layanan</span><span style="color: var(--color-ink-900); font-weight: 600;">${formatRupiah(fee)}</span></div>
+        <div class="pricing-row" id="ins-row" style="display:none;color:var(--color-primary-dark);"><span>Asuransi ekstra</span><span>+${formatRupiah(10000)}</span></div>
+        <div class="pricing-row total"><span>Total bayar</span><span id="pay-total-val">${formatRupiah(total)}</span></div>
+      `;
+    }
+    loadWarehouseForPayment();
+
     let selected = 'transfer';
 
     const icons = { transfer: 'BNK', qris: 'QR', gopay: 'GP', ovo: 'OV' };
@@ -189,8 +223,8 @@
       <div class="pay-method ${m.id === selected ? 'selected' : ''}" data-id="${m.id}" onclick="pickMethod('${m.id}')">
         <div class="icon">${icons[m.id] || '$'}</div>
         <div class="text">
-          <h6>${m.label}</h6>
-          <p>${m.desc}</p>
+          <h6>${escapeHtml(m.label)}</h6>
+          <p>${escapeHtml(m.desc)}</p>
         </div>
         <div class="check"></div>
       </div>`).join('');
@@ -201,22 +235,6 @@
         el.classList.toggle('selected', el.dataset.id === id);
       });
     }
-
-    const { subtotal, fee, total } = calcBookingPrice(w.price, data.days);
-    document.getElementById('summary').innerHTML = `
-      <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: var(--border-subtle);">
-        <img src="${w.image}" style="width: 56px; height: 56px; object-fit: cover; border-radius: 8px;" />
-        <div>
-          <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); font-size: 14px;">${w.name}</div>
-          <div style="font-size: 12px; color: var(--color-gray-500);">${w.location}</div>
-        </div>
-      </div>
-      <div class="pricing-row"><span style="color: var(--color-gray-600);">Durasi sewa</span><span style="color: var(--color-ink-900); font-weight: 600;">${data.days} hari</span></div>
-      <div class="pricing-row"><span style="color: var(--color-gray-600);">Subtotal</span><span style="color: var(--color-ink-900); font-weight: 600;">${formatRupiah(subtotal)}</span></div>
-      <div class="pricing-row"><span style="color: var(--color-gray-600);">Biaya layanan</span><span style="color: var(--color-ink-900); font-weight: 600;">${formatRupiah(fee)}</span></div>
-      <div class="pricing-row" id="ins-row" style="display:none;color:var(--color-primary-dark);"><span>Asuransi ekstra</span><span>+${formatRupiah(10000)}</span></div>
-      <div class="pricing-row total"><span>Total bayar</span><span id="pay-total-val">${formatRupiah(total)}</span></div>
-    `;
 
     let insuranceAdded = false;
 

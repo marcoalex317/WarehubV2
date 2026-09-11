@@ -261,9 +261,9 @@
           <span class="badge badge-success" style="position: absolute; top: 12px; left: 12px;"><span class="dot dot-success"></span>Tersedia</span>
         </div>
         <div class="summary-body">
-          <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); font-size: 1.0625rem; margin-bottom: 4px;">${w.name}</div>
+          <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); font-size: 1.0625rem; margin-bottom: 4px;">${escapeHtml(w.name)}</div>
           <div style="font-size: 13px; color: var(--color-gray-500); display: flex; align-items: center; gap: 4px; margin-bottom: 1rem;">
-            <img src="assets/icons/location.svg" alt="" style="width: 12px; height: 12px;" />${w.location}
+            <img src="assets/icons/location.svg" alt="" style="width: 12px; height: 12px;" />${escapeHtml(w.location)}
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1.25rem;">
             <div style="padding: 0.6rem; background: var(--color-gray-50); border-radius: 8px;">

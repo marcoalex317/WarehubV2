@@ -27,7 +27,7 @@ async function getDatabase() {
       name       TEXT    NOT NULL,
       email      TEXT    NOT NULL UNIQUE,
       password   TEXT    NOT NULL,
-      role       TEXT    NOT NULL CHECK(role IN ('tenant', 'owner')),
+      role       TEXT    NOT NULL CHECK(role IN ('tenant', 'owner', 'admin')),
       phone      TEXT    DEFAULT '',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )

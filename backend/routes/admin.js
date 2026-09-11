@@ -1,19 +1,20 @@
 const express = require('express');
+const { authenticateToken, requireRole } = require('../middleware/auth');
+const { rowsToTable } = require('../utils/db');
+
 const router = express.Router();
 
-function rowToObj(result) {
-  if (!result.length || !result[0].values.length) return { columns: [], rows: [] };
-  return { columns: result[0].columns, rows: result[0].values };
-}
-
 // GET /api/admin/tables — Semua data dari database
-router.get('/tables', (req, res) => {
+// PENTING: hanya boleh diakses oleh user berrole 'admin'. Sebelumnya
+// endpoint ini tidak diproteksi sama sekali sehingga siapa pun bisa
+// membuka data seluruh user, gudang, dan booking tanpa login.
+router.get('/tables', authenticateToken, requireRole('admin'), (req, res) => {
   try {
     const db = req.app.locals.db;
 
-    const users = rowToObj(db.exec('SELECT id, name, email, role, phone, created_at FROM users ORDER BY id'));
-    const warehouses = rowToObj(db.exec('SELECT id, owner_id, name, location, address, size, price, available, rating, reviews, created_at FROM warehouses ORDER BY id'));
-    const bookings = rowToObj(db.exec(`
+    const users = rowsToTable(db.exec('SELECT id, name, email, role, phone, created_at FROM users ORDER BY id'));
+    const warehouses = rowsToTable(db.exec('SELECT id, owner_id, name, location, address, size, price, available, rating, reviews, created_at FROM warehouses ORDER BY id'));
+    const bookings = rowsToTable(db.exec(`
       SELECT b.id, b.tenant_id, b.warehouse_id, u.name as tenant_name, w.name as warehouse_name,
              b.start_date, b.end_date, b.days, b.total_price, b.status, b.created_at
       FROM bookings b

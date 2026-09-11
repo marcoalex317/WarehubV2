@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const { authenticateToken, requireRole } = require('../middleware/auth');
+const { rowsToObjects } = require('../utils/db');
 
 const router = express.Router();
 
@@ -31,13 +32,9 @@ const upload = multer({
   }
 });
 
-// Helper: ubah row hasil sql.js jadi object
+// Ubah row hasil sql.js jadi object, lalu parse kolom facilities (JSON string -> array)
 function rowToObj(result) {
-  if (!result.length || !result[0].values.length) return [];
-  const cols = result[0].columns;
-  return result[0].values.map(row => {
-    const obj = {};
-    cols.forEach((c, i) => { obj[c] = row[i]; });
+  return rowsToObjects(result).map(obj => {
     if (obj.facilities) {
       try { obj.facilities = JSON.parse(obj.facilities); } catch (e) { obj.facilities = []; }
     }

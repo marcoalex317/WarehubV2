@@ -192,7 +192,6 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="assets/js/data.js"></script>
   <script src="assets/js/auth.js"></script>
   <script src="assets/js/main.js"></script>
   <script>
@@ -236,7 +235,7 @@
       const availBadge = w.available
         ? `<span class="badge badge-success"><span class="dot dot-success"></span>Tersedia</span>`
         : `<span class="badge badge-gray">Penuh</span>`;
-      const tags = (w.facilities || []).slice(0, 2).map(t => `<span class="badge badge-gray" style="margin-left:4px;">${t}</span>`).join('');
+      const tags = (w.facilities || []).slice(0, 2).map(t => `<span class="badge badge-gray" style="margin-left:4px;">${escapeHtml(t)}</span>`).join('');
       const isSelected = compareList.includes(w.id);
       const imgSrc = getWarehouseImage(w);
       return `
@@ -245,10 +244,10 @@
           <div class="warehouse-card-fav" onclick="event.preventDefault();event.stopPropagation();">
             <svg viewBox="0 0 18 18" fill="none"><path d="M9 15.5C9 15.5 1.5 11.25 1.5 6.25C1.5 4.04086 3.29086 2.25 5.5 2.25C7.0913 2.25 8.4587 3.18261 9 4.5C9.5413 3.18261 10.9087 2.25 12.5 2.25C14.7091 2.25 16.5 4.04086 16.5 6.25C16.5 11.25 9 15.5 9 15.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
           </div>
-          <img src="${imgSrc}" alt="${w.name}" class="warehouse-card-img" />
+          <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(w.name)}" class="warehouse-card-img" />
           <div class="card-body">
-            <div class="warehouse-card-name">${w.name}</div>
-            <div class="warehouse-card-loc"><img src="assets/icons/location.svg" alt="" />${w.location}</div>
+            <div class="warehouse-card-name">${escapeHtml(w.name)}</div>
+            <div class="warehouse-card-loc"><img src="assets/icons/location.svg" alt="" />${escapeHtml(w.location)}</div>
             <div class="warehouse-card-tags"><span class="badge badge-gray">${w.size} m²</span>${tags}</div>
             <div class="warehouse-card-bottom">
               <div class="warehouse-price">${formatRupiah(w.price)}<span> /hari</span></div>
@@ -289,8 +288,8 @@
       const slotItems = compareList.map(id => {
         const w = warehouses.find(x => x.id === id);
         return `<div style="display:flex;align-items:center;gap:0.625rem;background:rgba(255,255,255,0.08);border-radius:8px;padding:0.5rem 0.75rem;">
-          <img src="${w.image}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0;" />
-          <div><div style="font-size:13px;font-weight:600;color:white;white-space:nowrap;">${w.name}</div><div style="font-size:11px;color:rgba(255,255,255,0.55);">${formatRupiah(w.price)}/hari</div></div>
+          <img src="${escapeHtml(w.image)}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0;" />
+          <div><div style="font-size:13px;font-weight:600;color:white;white-space:nowrap;">${escapeHtml(w.name)}</div><div style="font-size:11px;color:rgba(255,255,255,0.55);">${formatRupiah(w.price)}/hari</div></div>
           <button onclick="toggleCompare(${id})" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.4);font-size:18px;line-height:1;padding:0 0 0 4px;">×</button>
         </div>`;
       });
@@ -316,19 +315,19 @@
         <div style="display:grid;grid-template-columns:130px 1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
           <div></div>
           ${[a,b].map(w=>`<div style="text-align:center;">
-            <img src="${w.image}" style="width:100%;height:130px;object-fit:cover;border-radius:var(--radius-lg);margin-bottom:0.75rem;" />
-            <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);">${w.name}</div>
+            <img src="${escapeHtml(w.image)}" style="width:100%;height:130px;object-fit:cover;border-radius:var(--radius-lg);margin-bottom:0.75rem;" />
+            <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);">${escapeHtml(w.name)}</div>
             ${w.available?'<span class="badge badge-success" style="display:inline-flex;margin-top:4px;"><span class="dot dot-success"></span>Tersedia</span>':'<span class="badge badge-gray" style="display:inline-flex;margin-top:4px;">Penuh</span>'}
           </div>`).join('')}
         </div>
         ${row('Harga/hari', `<strong>${formatRupiah(a.price)}</strong>`, `<strong>${formatRupiah(b.price)}</strong>`, true)}
         ${row('Ukuran', `${a.size} m²`, `${b.size} m²`)}
         ${row('Rating', `★ ${a.rating} <span style="color:var(--color-gray-500);font-size:11px;">(${a.reviews} ulasan)</span>`, `★ ${b.rating} <span style="color:var(--color-gray-500);font-size:11px;">(${b.reviews} ulasan)</span>`)}
-        ${row('Lokasi', a.location, b.location)}
-        ${row('Fasilitas', a.facilities.map(f=>`<span class="badge badge-gray" style="margin:2px;">${f}</span>`).join(''), b.facilities.map(f=>`<span class="badge badge-gray" style="margin:2px;">${f}</span>`).join(''))}
+        ${row('Lokasi', escapeHtml(a.location), escapeHtml(b.location))}
+        ${row('Fasilitas', a.facilities.map(f=>`<span class="badge badge-gray" style="margin:2px;">${escapeHtml(f)}</span>`).join(''), b.facilities.map(f=>`<span class="badge badge-gray" style="margin:2px;">${escapeHtml(f)}</span>`).join(''))}
         <div style="display:grid;grid-template-columns:130px 1fr 1fr;gap:1rem;margin-top:1.5rem;">
           <div></div>
-          ${[a,b].map(w=>`<a href="detail.html?id=${w.id}" class="btn btn-primary" style="justify-content:center;">Booking ${w.name.split(' ')[0]} →</a>`).join('')}
+          ${[a,b].map(w=>`<a href="detail.html?id=${w.id}" class="btn btn-primary" style="justify-content:center;">Booking ${escapeHtml(w.name.split(' ')[0])} →</a>`).join('')}
         </div>
       `;
       document.getElementById('compare-modal').classList.add('show');

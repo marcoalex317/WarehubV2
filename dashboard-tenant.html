@@ -429,10 +429,10 @@
           };
           return `
             <div class="booking-row">
-              <img src="${imgSrc}" alt="" />
+              <img src="${escapeHtml(imgSrc)}" alt="" />
               <div>
-                <div class="row-name">${b.warehouse_name}</div>
-                <div class="row-sub"><img src="assets/icons/location.svg" alt="" style="width:11px;height:11px;" />${b.warehouse_location} · ${b.days} hari · ${b.start_date}</div>
+                <div class="row-name">${escapeHtml(b.warehouse_name)}</div>
+                <div class="row-sub"><img src="assets/icons/location.svg" alt="" style="width:11px;height:11px;" />${escapeHtml(b.warehouse_location)} · ${b.days} hari · ${escapeHtml(b.start_date)}</div>
               </div>
               <div style="font-family:var(--font-display);font-weight:700;color:var(--color-ink-900);">${formatRupiah(b.total_price)}</div>
               ${statusMap[b.status] || statusMap.pending}

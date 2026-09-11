@@ -146,6 +146,10 @@
     function renderDetail() {
     document.getElementById('bc-name').textContent = w.name;
     document.title = w.name + ' — WareHub';
+    // Field di bawah ini (name, address, description, owner_name, facilities)
+    // berasal dari input pemilik gudang lewat form "Tambah gudang", jadi
+    // di-escape sebelum dipasang ke innerHTML supaya tidak bisa dipakai
+    // untuk menyuntik HTML/script (stored XSS).
 
     const galleryImgs = [w.image, w.image, w.image, w.image];
 
@@ -169,7 +173,7 @@
     ];
 
     const html = `
-      <h1 style="color: var(--color-ink-900); font-size: 2.25rem; margin-bottom: 0.75rem; letter-spacing: -0.025em;">${w.name}</h1>
+      <h1 style="color: var(--color-ink-900); font-size: 2.25rem; margin-bottom: 0.75rem; letter-spacing: -0.025em;">${escapeHtml(w.name)}</h1>
       <div style="display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; margin-bottom: 1.75rem;">
         <div style="display: flex; align-items: center; gap: 0.4rem; font-size: var(--font-size-sm); color: var(--color-gray-700);">
           <img src="assets/icons/star.svg" alt="" style="width: 14px; height: 14px;" />
@@ -179,7 +183,7 @@
         <span style="color: var(--color-gray-300);">•</span>
         <div style="display: flex; align-items: center; gap: 0.4rem; font-size: var(--font-size-sm); color: var(--color-gray-700);">
           <img src="assets/icons/location.svg" alt="" style="width: 14px; height: 14px;" />
-          ${w.address}
+          ${escapeHtml(w.address)}
         </div>
         <span style="color: var(--color-gray-300);">•</span>
         ${w.available ? `<span class="badge badge-success"><span class="dot dot-success"></span>Tersedia</span>` : `<span class="badge badge-gray">Penuh</span>`}
@@ -210,7 +214,7 @@
           <!-- About -->
           <div class="detail-section">
             <h3>Tentang gudang ini</h3>
-            <p style="color: var(--color-gray-700); line-height: 1.75; font-size: var(--font-size-base);">${w.description}</p>
+            <p style="color: var(--color-gray-700); line-height: 1.75; font-size: var(--font-size-base);">${escapeHtml(w.description)}</p>
             <p style="color: var(--color-gray-700); line-height: 1.75; font-size: var(--font-size-base); margin-top: 1rem;">Pemilik berkomitmen menjaga kualitas gudang dan responsif terhadap kebutuhan penyewa. Cocok untuk UMKM, online seller, distributor kecil hingga menengah.</p>
           </div>
 
@@ -221,7 +225,7 @@
               ${w.facilities.map(f => `
                 <div class="facility-item">
                   <div class="icon-tile"><img src="${facIcons[f] || 'assets/icons/check.svg'}" alt="" /></div>
-                  <span>${f}</span>
+                  <span>${escapeHtml(f)}</span>
                 </div>`).join('')}
             </div>
           </div>
@@ -230,7 +234,7 @@
           <div class="detail-section">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
               <h3 style="margin:0;">Lokasi Gudang</h3>
-              <a href="https://maps.google.com/?q=${encodeURIComponent(w.address)}" target="_blank" rel="noopener"
+              <a href="https://maps.google.com/?q=${encodeURIComponent(w.address || '')}" target="_blank" rel="noopener"
                  class="btn btn-outline btn-sm">
                 <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
                   <path d="M10.5 1H2.5C1.67 1 1 1.67 1 2.5V10.5C1 11.33 1.67 12 2.5 12H10.5C11.33 12 12 11.33 12 10.5V2.5C12 1.67 11.33 1 10.5 1Z" stroke="currentColor" stroke-width="1.3"/>
@@ -242,11 +246,11 @@
             </div>
             <div style="display:flex;align-items:center;gap:0.5rem;font-size:var(--font-size-sm);color:var(--color-gray-600);margin-bottom:0.875rem;">
               <img src="assets/icons/location.svg" alt="" style="width:14px;height:14px;opacity:0.6;" />
-              ${w.address}
+              ${escapeHtml(w.address)}
             </div>
             <div style="border-radius:var(--radius-lg);overflow:hidden;border:var(--border-subtle);">
               <iframe
-                src="https://maps.google.com/maps?q=${encodeURIComponent(w.address)}&output=embed&hl=id&z=15"
+                src="https://maps.google.com/maps?q=${encodeURIComponent(w.address || '')}&output=embed&hl=id&z=15"
                 width="100%" height="320"
                 style="display:block;border:none;"
                 allowfullscreen loading="lazy"
@@ -262,9 +266,9 @@
           <div class="detail-section">
             <h3>Tentang pemilik</h3>
             <div style="display: flex; align-items: center; gap: 1rem; padding: 1.25rem; border: var(--border-subtle); border-radius: var(--radius-lg);">
-              <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--color-ink-900); color: white; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 1.25rem;">${(w.owner_name || 'P').charAt(0)}</div>
+              <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--color-ink-900); color: white; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 1.25rem;">${escapeHtml((w.owner_name || 'P').charAt(0))}</div>
               <div style="flex: 1;">
-                <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); margin-bottom: 2px;">${w.owner_name || 'Pemilik'}</div>
+                <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-ink-900); margin-bottom: 2px;">${escapeHtml(w.owner_name || 'Pemilik')}</div>
                 <div style="font-size: var(--font-size-sm); color: var(--color-gray-500);">Pemilik gudang · respon &lt; 30 menit</div>
               </div>
               <button class="btn btn-outline btn-sm" onclick="window.location.href='messages.html?owner='+encodeURIComponent(w.owner_name||'Pemilik')+'&warehouse='+encodeURIComponent(w.name)">Hubungi</button>

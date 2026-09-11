@@ -347,7 +347,6 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="assets/js/data.js"></script>
   <script src="assets/js/auth.js"></script>
   <script src="assets/js/main.js"></script>
   <script>
@@ -358,49 +357,37 @@
       window.location.href = "search.html" + (q ? "?q=" + encodeURIComponent(q) : "");
     }
 
-    function buildWarehouseCard(w) {
-      const availBadge = w.available
-        ? `<span class="badge badge-success"><span class="dot dot-success"></span>Tersedia</span>`
-        : `<span class="badge badge-gray">Penuh</span>`;
-      const tags = w.tags.slice(0, 2).map(t =>
-        `<span class="badge badge-gray">${t}</span>`
-      ).join("");
-      return `
-        <a href="detail.html?id=${w.id}" class="card card-clickable warehouse-card">
-          <div class="warehouse-card-availability">${availBadge}</div>
-          <div class="warehouse-card-fav" onclick="event.preventDefault();event.stopPropagation();this.querySelector('svg').setAttribute('fill', this.querySelector('svg').getAttribute('fill') === 'none' ? '#F97316' : 'none');this.querySelector('svg').setAttribute('stroke', '#F97316');">
-            <svg viewBox="0 0 18 18" fill="none"><path d="M9 15.5C9 15.5 1.5 11.25 1.5 6.25C1.5 4.04086 3.29086 2.25 5.5 2.25C7.0913 2.25 8.4587 3.18261 9 4.5C9.5413 3.18261 10.9087 2.25 12.5 2.25C14.7091 2.25 16.5 4.04086 16.5 6.25C16.5 11.25 9 15.5 9 15.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-          </div>
-          <img src="${w.image}" alt="${w.name}" class="warehouse-card-img" />
-          <div class="card-body">
-            <div class="warehouse-card-name">${w.name}</div>
-            <div class="warehouse-card-loc">
-              <img src="assets/icons/location.svg" alt="" />
-              ${w.location}
-            </div>
-            <div class="warehouse-card-tags">
-              <span class="badge badge-gray">${w.size} m²</span>
-              ${tags}
-            </div>
-            <div class="warehouse-card-bottom">
-              <div class="warehouse-price">
-                ${formatRupiah(w.price)}<span> /hari</span>
-              </div>
-              <div class="warehouse-rating">
-                <img src="assets/icons/star.svg" alt="" />
-                ${w.rating}
-                <span class="reviews">(${w.reviews})</span>
-              </div>
-            </div>
-          </div>
-        </a>
-      `;
-    }
+    // buildWarehouseCard() dipakai dari assets/js/main.js (sudah termasuk
+    // escaping XSS) — tidak perlu didefinisikan ulang di sini.
+    // Kartu ini butuh field "tags", yang tidak dikembalikan API, jadi
+    // kita turunkan dari facilities sebelum dirender.
+    async function loadPopularWarehouses() {
+      const grid = document.getElementById("popular-grid");
+      if (!grid) return;
+      try {
+        const res = await fetch(window.location.origin + '/api/warehouses');
+        const data = await res.json();
+        if (!data.success) return;
 
-    const grid = document.getElementById("popular-grid");
-    if (grid) {
-      grid.innerHTML = warehouses.slice(0, 3).map(buildWarehouseCard).join("");
+        const popular = data.warehouses
+          .map(w => ({
+            ...w,
+            available: w.available === 1 || w.available === true,
+            facilities: Array.isArray(w.facilities) ? w.facilities : [],
+            rating: w.rating || 0,
+            reviews: w.reviews || 0,
+            image: (w.image && w.image !== '') ? w.image : 'assets/images/placeholder-warehouse.svg',
+            tags: [...(Array.isArray(w.facilities) ? w.facilities : [])]
+          }))
+          .sort((a, b) => b.rating - a.rating)
+          .slice(0, 3);
+
+        grid.innerHTML = popular.map(buildWarehouseCard).join("");
+      } catch (err) {
+        console.error('Gagal memuat gudang populer:', err);
+      }
     }
+    loadPopularWarehouses();
 
     document.querySelector('a[href="#fitur"]')?.addEventListener("click", function(e) {
       e.preventDefault();

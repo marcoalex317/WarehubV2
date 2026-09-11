@@ -2,6 +2,20 @@
 // UTILITY FUNCTIONS
 // =====================
 
+// Escape karakter HTML supaya teks yang berasal dari input user
+// (nama gudang, deskripsi, nama user, dll — semua yang tersimpan di
+// database) aman dipasang lewat innerHTML/template literal dan tidak
+// bisa dipakai untuk menyuntikkan tag/script (XSS).
+function escapeHtml(text) {
+  if (text === null || text === undefined) return '';
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // Format angka ke Rupiah
 function formatRupiah(amount) {
   return "Rp " + amount.toLocaleString("id-ID");
@@ -147,18 +161,18 @@ function buildWarehouseCard(w) {
     : `<span class="badge badge-gray">Penuh</span>`;
 
   const tags = w.tags.slice(0, 2).map(t =>
-    `<span class="badge badge-gray">${t}</span>`
+    `<span class="badge badge-gray">${escapeHtml(t)}</span>`
   ).join("");
 
   return `
     <a href="detail.html?id=${w.id}" class="card card-clickable warehouse-card">
       <div class="warehouse-card-availability">${availBadge}</div>
-      <img src="${w.image}" alt="${w.name}" class="warehouse-card-img" />
+      <img src="${escapeHtml(w.image)}" alt="${escapeHtml(w.name)}" class="warehouse-card-img" />
       <div class="card-body">
-        <div class="warehouse-card-name">${w.name}</div>
+        <div class="warehouse-card-name">${escapeHtml(w.name)}</div>
         <div class="warehouse-card-loc">
           <img src="assets/icons/location.svg" alt="" />
-          ${w.location}
+          ${escapeHtml(w.location)}
         </div>
         <div class="warehouse-card-tags">
           <span class="badge badge-gray">${w.size} m²</span>

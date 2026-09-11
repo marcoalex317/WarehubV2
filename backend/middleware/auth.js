@@ -1,6 +1,15 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = 'warehub-secret-key-ganti-di-production';
+// JWT secret diambil dari environment variable (lihat file .env).
+// server.js sudah memanggil dotenv.config() sebelum file ini di-load,
+// jadi process.env.JWT_SECRET pasti sudah tersedia saat aplikasi jalan normal.
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error(
+    'JWT_SECRET belum diset. Salin .env.example menjadi .env lalu isi JWT_SECRET.'
+  );
+}
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];

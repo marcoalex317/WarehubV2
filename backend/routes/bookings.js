@@ -1,17 +1,8 @@
 const express = require('express');
 const { authenticateToken } = require('../middleware/auth');
+const { rowsToObjects: rowToObj } = require('../utils/db');
 
 const router = express.Router();
-
-function rowToObj(result) {
-  if (!result.length || !result[0].values.length) return [];
-  const cols = result[0].columns;
-  return result[0].values.map(row => {
-    const obj = {};
-    cols.forEach((c, i) => { obj[c] = row[i]; });
-    return obj;
-  });
-}
 
 // POST /api/bookings — Buat booking baru (tenant only)
 router.post('/', authenticateToken, (req, res) => {

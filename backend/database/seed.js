@@ -5,10 +5,24 @@ async function seed(db) {
   const standalone = !db;
   if (!db) db = await getDatabase();
 
+  // --- Akun admin: dibuat/diperiksa terpisah supaya tetap ada     ---
+  // --- walau data demo tenant/owner sudah pernah di-seed sebelumnya ---
+  const existingAdmin = db.exec("SELECT COUNT(*) as c FROM users WHERE email = 'admin@warehub.com'");
+  if (!existingAdmin.length || existingAdmin[0].values[0][0] === 0) {
+    const adminPw = bcrypt.hashSync('admin123', 10);
+    db.run(
+      `INSERT INTO users (name, email, password, role, phone) VALUES (?, ?, ?, ?, ?)`,
+      ['Admin WareHub', 'admin@warehub.com', adminPw, 'admin', '']
+    );
+    console.log('  Akun admin:  admin@warehub.com / admin123');
+    saveDatabase();
+  }
+
   // Cek apakah sudah ada user demo
   const existing = db.exec("SELECT COUNT(*) as c FROM users WHERE email = 'tenant@warehub.com'");
   if (existing.length && existing[0].values[0][0] > 0) {
     console.log('  Data demo sudah ada. Seed dilewati.');
+    if (standalone) process.exit(0);
     return;
   }
 
