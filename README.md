@@ -12,6 +12,14 @@ GitHub Pages hanya bisa menyajikan file statis, jadi backend Express tidak ikut 
 - Booking, tambah gudang, dan hapus gudang tetap berfungsi, tapi hanya tersimpan di browser masing-masing pengunjung. Tombol "Reset" mengembalikan data ke awal.
 - Saat dijalankan dengan `npm start`, mode demo tidak aktif dan semua data lewat backend asli. Untuk mencoba mode demo di localhost, buka `http://localhost:3000/?demo=1`.
 
+## Screenshots
+
+![Beranda](docs/screenshots/01-home.jpg)
+![Cari gudang](docs/screenshots/02-search.jpg)
+![Dashboard pemilik](docs/screenshots/04-owner-dashboard.jpg)
+
+Screenshot lain ada di folder `docs/screenshots/`.
+
 ## Stack
 
 - Frontend: HTML/CSS/JS statis (tanpa framework/build step)
