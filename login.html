@@ -49,17 +49,17 @@
         </p>
 
         <div class="demo-card">
-          <h6>AKUN DEMO — KLIK UNTUK ISI</h6>
+          <h6>AKUN DEMO - KLIK UNTUK MASUK</h6>
           <div class="demo-row" onclick="fillDemo('tenant@warehub.com','tenant123')">
             <div>
-              <div style="color: white; font-weight: 600;"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="becadbd0dfd0cafec9dfccdbd6cbdc90ddd1d3">[email&#160;protected]</a></div>
+              <div style="color: white; font-weight: 600;">tenant@warehub.com</div>
               <div style="color: rgba(255,255,255,0.4); font-size: 11px; margin-top: 2px;">tenant123</div>
             </div>
             <div class="role">PENYEWA</div>
           </div>
           <div class="demo-row" onclick="fillDemo('owner@warehub.com','owner123')">
             <div>
-              <div style="color: white; font-weight: 600;"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="355a425b504775425447505d40571b565a58">[email&#160;protected]</a></div>
+              <div style="color: white; font-weight: 600;">owner@warehub.com</div>
               <div style="color: rgba(255,255,255,0.4); font-size: 11px; margin-top: 2px;">owner123</div>
             </div>
             <div class="role">PEMILIK</div>
@@ -114,13 +114,16 @@
 
   <div class="toast" id="toast"></div>
   <script src="assets/js/auth.js"></script>
+  <script src="assets/js/demo.js"></script>
   <script src="assets/js/main.js"></script>
   <script>
     redirectIfLoggedIn();
 
+    // Klik akun demo langsung mengisi form dan masuk.
     function fillDemo(email, pw) {
       document.getElementById('email').value = email;
       document.getElementById('password').value = pw;
+      document.getElementById('login-form').requestSubmit();
     }
 
     async function doLogin(e) {
@@ -135,7 +138,7 @@
       if (result.success) {
         showToast('Berhasil masuk! Mengalihkan...');
         setTimeout(() => {
-          window.location.href = result.user.role === 'tenant' ? 'dashboard-tenant.html' : 'dashboard-owner.html';
+          window.location.href = result.user.role === 'tenant' ? 'dashboard-tenant.html' : result.user.role === 'admin' ? 'admin.html' : 'dashboard-owner.html';
         }, 600);
       } else {
         errBox.textContent = result.message;

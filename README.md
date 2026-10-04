@@ -2,6 +2,16 @@
 
 WareHub adalah marketplace sewa gudang untuk UMKM — penyewa (tenant) bisa mencari dan booking gudang, pemilik (owner) bisa listing gudangnya dan mengelola booking yang masuk.
 
+## Demo online (tanpa login)
+
+Live demo: https://marcoalex317.github.io/WarehubV2/
+
+GitHub Pages hanya bisa menyajikan file statis, jadi backend Express tidak ikut jalan di sana. Supaya web tetap bisa dicoba, `assets/js/demo.js` otomatis aktif di GitHub Pages: semua request ke `/api/*` dijawab dari data contoh (isinya sama dengan `seed.js`) yang disimpan di localStorage browser pengunjung.
+
+- Tidak perlu daftar atau login. Panel "Mode demo" di pojok kiri bawah langsung membuka dashboard Penyewa, Pemilik, atau Admin.
+- Booking, tambah gudang, dan hapus gudang tetap berfungsi, tapi hanya tersimpan di browser masing-masing pengunjung. Tombol "Reset" mengembalikan data ke awal.
+- Saat dijalankan dengan `npm start`, mode demo tidak aktif dan semua data lewat backend asli. Untuk mencoba mode demo di localhost, buka `http://localhost:3000/?demo=1`.
+
 ## Stack
 
 - Frontend: HTML/CSS/JS statis (tanpa framework/build step)
@@ -50,6 +60,7 @@ backend/
   utils/db.js              helper bersama untuk ubah hasil query sql.js
 assets/
   css/, js/, icons/, images/
+  js/demo.js               mock API untuk demo statis (GitHub Pages)
 *.html                     tiap halaman berdiri sendiri (bukan SPA)
 ```
 

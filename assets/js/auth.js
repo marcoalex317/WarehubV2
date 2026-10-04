@@ -123,10 +123,19 @@ function requireRole(role, redirectTo = "index.html") {
 }
 
 function redirectIfLoggedIn() {
+  // Pakai isLoggedIn() (user + token), sama seperti requireLogin().
+  // Dulu hanya cek user, jadi sesi tanpa token membuat login.html dan
+  // dashboard saling redirect tanpa henti.
+  if (!isLoggedIn()) {
+    clearSession();
+    return;
+  }
   const user = getCurrentUser();
   if (user) {
     if (user.role === "tenant") {
       window.location.href = "dashboard-tenant.html";
+    } else if (user.role === "admin") {
+      window.location.href = "admin.html";
     } else {
       window.location.href = "dashboard-owner.html";
     }

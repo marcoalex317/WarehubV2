@@ -373,6 +373,7 @@
   <div class="toast" id="toast"></div>
   <script src="assets/js/data.js"></script>
   <script src="assets/js/auth.js"></script>
+  <script src="assets/js/demo.js"></script>
   <script src="assets/js/main.js"></script>
   <script>
     if (!requireLogin()) {} else if (getCurrentRole() === 'owner') { window.location.href = 'dashboard-owner.html'; }
@@ -420,7 +421,7 @@
         document.getElementById('stat-warehouses').textContent = uniqueWarehouses;
 
         const bookingHTML = data.bookings.map(b => {
-          const imgSrc = b.warehouse_image && b.warehouse_image.startsWith('/uploads/') ? b.warehouse_image : 'assets/images/placeholder-warehouse.svg';
+          const imgSrc = b.warehouse_image ? b.warehouse_image : 'assets/images/placeholder-warehouse.svg';
           const statusMap = {
             active: '<span class="badge badge-success"><span class="dot dot-success"></span>Aktif</span>',
             pending: '<span class="badge" style="background:var(--color-warning-light);color:var(--color-warning);"><span class="dot" style="background:var(--color-warning);"></span>Menunggu</span>',
